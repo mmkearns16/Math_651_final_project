@@ -5,6 +5,39 @@ date: "November 25, 2018"
 output: pdf_document
 ---
 
-# Title 
+Notes: 
 
-## subsection topic
+Implement 2 methods in the analysis
+
+last 2/3 summer olympics, how it changes over time? or should we just do a single
+
+explore how each beta term affects the medal count. 
+
+variables:
+gdp 
+population
+per capita
+sports investment 
+
+
+Sections:
+intro: How do economic indicators corelate with their performance at the summer olympics?
+what questions should we address?
+    how do these things vary over time?
+    get into different sports?
+    track and field vs swimming?
+    teams sports vs individual?
+what methods will we use?
+link to data
+
+
+
+
+
+
+
+
+
+
+
+
