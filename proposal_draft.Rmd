@@ -1,0 +1,10 @@
+---
+title: "651 Project Proposal"
+author: "Mary Peng, Hillary Dunn, and Max Kearns"
+date: "November 25, 2018"
+output: pdf_document
+---
+
+# Title 
+
+## subsection topic
