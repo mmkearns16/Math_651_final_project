@@ -1,5 +1,5 @@
 UN Development Program: 
-    http://hdr.undp.org/en/composite/GII
+    http://hdr.undp.org/en/data#
 
 Kaggle, from the IOC Research and Reference Service and published by The Guardian's Datablog.
     https://www.kaggle.com/the-guardian/olympic-games/home
