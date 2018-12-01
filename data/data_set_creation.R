@@ -101,9 +101,207 @@ reg<-reg[!(reg$country  %in% bad_stuff),]
 
 
 setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_project/data")
-write.csv(reg, 'base_data.csv')
-write.csv(gender, 'gender_data.csv')
-write.csv(sport, 'sport_data.csv')
+#write.csv(reg, 'base_data.csv')
+#write.csv(gender, 'gender_data.csv')
+#write.csv(sport, 'sport_data.csv')
+
+
+################################################################# GDP
+
+
+
+setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_project/raw_data")
+
+gdp<-read.csv('GDP.csv')
+gdp<-gdp[,c(1, seq(37, 57, 4))]
+
+gdp_1992<-gdp[,c(1,2)]
+gdp_1996<-gdp[,c(1,3)]
+gdp_2000<-gdp[,c(1,4)]
+gdp_2004<-gdp[,c(1,5)]
+gdp_2008<-gdp[,c(1,6)]
+gdp_2012<-gdp[,c(1,7)]
+
+gdp_1992$year<-1992
+gdp_1996$year<-1996
+gdp_2000$year<-2000
+gdp_2004$year<-2004
+gdp_2008$year<-2008
+gdp_2012$year<-2012
+
+
+colnames(gdp_1992)<-c('country', 'gdp', 'year')
+colnames(gdp_1996)<-c('country', 'gdp', 'year')
+colnames(gdp_2000)<-c('country', 'gdp', 'year')
+colnames(gdp_2004)<-c('country', 'gdp', 'year')
+colnames(gdp_2008)<-c('country', 'gdp', 'year')
+colnames(gdp_2012)<-c('country', 'gdp', 'year')
+
+gdp<-rbind(gdp_1992, gdp_1996, gdp_2000, gdp_2004, gdp_2008, gdp_2012)
+
+# fix north korea 
+gdp[which(gdp$country=='Korea, Dem. Peopleâ€™s Rep.'),1]<-'North Korea'
+
+#######################################################################################  Population
+pop<-read.csv('Population.csv', sep = '\t')
+
+colnames(pop)[57]
+
+pop<-pop[,c(1, seq(37, 57, 4))]
+
+
+pop_1992<-pop[,c(1,2)]
+pop_1996<-pop[,c(1,3)]
+pop_2000<-pop[,c(1,4)]
+pop_2004<-pop[,c(1,5)]
+pop_2008<-pop[,c(1,6)]
+pop_2012<-pop[,c(1,7)]
+
+pop_1992$year<-1992
+pop_1996$year<-1996
+pop_2000$year<-2000
+pop_2004$year<-2004
+pop_2008$year<-2008
+pop_2012$year<-2012
+
+
+colnames(pop_1992)<-c('country', 'pop', 'year')
+colnames(pop_1996)<-c('country', 'pop', 'year')
+colnames(pop_2000)<-c('country', 'pop', 'year')
+colnames(pop_2004)<-c('country', 'pop', 'year')
+colnames(pop_2008)<-c('country', 'pop', 'year')
+colnames(pop_2012)<-c('country', 'pop', 'year')
+
+pop<-rbind(pop_1992, pop_1996, pop_2000, pop_2004, pop_2008, pop_2012)
+
+pop[which(pop$country=='Korea, Dem. People’s Rep.'),1]<-'North Korea'
+
+
+############################################################################ JOINS
+
+
+setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_project/data")
+
+pop$country<-as.character(pop$country)
+gdp$country<-as.character(gdp$country)
+
+
+# only missed 6 joins, not bad 
+demographics<-full_join(gdp, pop)
+
+#fixing a couple names
+demographics[which(demographics$country=='Bahamas, The'),1]<-'Bahamas'
+demographics[which(demographics$country=='Iran, Islamic Rep.'),1]<-'Iran'
+demographics[which(demographics$country=='Iran, Islamic Rep.'),1]<-'Iran'
+demographics[which(demographics$country=='Korea, Rep.'),1]<-'South Korea'
+demographics[which(demographics$country=='Slovak Republic'),1]<-'Slovakia'
+demographics[which(demographics$country=='Russian Federation'),1]<-'Russia'
+demographics[which(demographics$country=='Czech Republic' & demographics$year==1992),1]<-'Czechoslovakia'
+demographics[which(demographics$country=='Egypt, Arab Rep.'),1]<-'Egypt'
+demographics[which(demographics$country=='Hong Kong SAR, China'),1]<-'Hong Kong'
+demographics[which(demographics$country=='Syrian Arab Republic'),1]<-'Syria'
+demographics[which(demographics$country=='Kyrgyz Republic'),1]<-'Kyrgyzstan'
+demographics[which(demographics$country=='Macedonia, FYR'),1]<-'Macedonia'
+demographics[which(demographics$country=='Venezuela, RB'),1]<-'Venezuela'
+
+
+
+##Base
+base<-read.csv('base_data.csv', stringsAsFactors = F)
+#there are 2 algerias 1992 for some reason
+base[-1,]
+
+base<-left_join(base, demographics)
+base<-base[,-1]
+
+
+##Gender
+gender<-read.csv('gender_data.csv', stringsAsFactors = F)
+gender<-left_join(gender, demographics)
+#fix algeria again
+gender<-gender[-c(1,3),]
+gender<-gender[,-1]
+
+sum(is.na(gender$gdp))
+sum(is.na(gender$pop))
+
+
+##Sport 
+sport<-read.csv('sport_data.csv', stringsAsFactors = F)
+sport<-left_join(sport, demographics)
+
+sport<-sport[,-1]
+#algeria...
+sport<-sport[-c(1,3),]
+
+sum(is.na(sport$gdp))
+sum(is.na(sport$pop))
+
+setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_project/data")
+#write.csv(base, 'base_data.csv')
+#write.csv(gender, 'gender_data.csv')
+#write.csv(sport, 'sport_data.csv')
+
+
+
+#######################################################################Gender Inequality
+
+
+setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_project/raw_data")
+
+inequality<-read.csv('Gender Inequality Index (GII).csv', stringsAsFactors = F)
+
+inequality<-inequality[,c(2,3,4,5,6,8)]
+
+
+inequality$X95<-1995
+inequality$X00<-2000
+inequality$X05<-2005
+inequality$X10<-2010
+inequality$X12<-2012
+
+colnames(inequality)<-c("country","index","index","index","index","index","year","year","year","year","year")
+
+inequality<-rbind(inequality[,c(1,2,7)], inequality[,c(1,3,8)], inequality[,c(1,4,9)], inequality[,c(1,5,10)], inequality[,c(1,6,11)])
+inequality$country<-trimws(inequality$country, which = 'left')
+
+inequality[which(inequality$country=='Korea (Republic of)'),1]<-'South Korea'
+inequality[which(inequality$country=='Czechia' & inequality$year==1995),1]<-'Czechoslovakia'
+inequality[which(inequality$country=='Czechia' & inequality$year!=1995),1]<-'Czech Republic'
+inequality[which(inequality$country=='Iran (Islamic Republic of)'),1]<-'Iran'
+inequality[which(inequality$country=='The former Yugoslav Republic of Macedonia'),1]<-'Macedonia'
+inequality[which(inequality$country=='Moldova (Republic of)'),1]<-'Moldova'
+inequality[which(inequality$country=='Russian Federation'),1]<-'Russia'
+inequality[which(inequality$country=='Syrian Arab Republic'),1]<-'Syria'
+inequality[which(inequality$country=='Venezuela (Bolivarian Republic of)'),1]<-'Venezuala'
+inequality[which(inequality$country=='Viet Nam'),1]<-'Vietnam'
+
+colnames$nearest_olympics<-o
+
+inequality[which(inequality$year==1995),4]<-1996
+inequality[which(inequality$year==2000),4]<-2000
+inequality[which(inequality$year==2005),4]<-2004
+inequality[which(inequality$year==2010),4]<-2008
+inequality[which(inequality$year==2012),4]<-2012
+
+###Making it Joinable
+
+
+join_test<-base[,c(2,3)]
+
+
+join_test %>%
+  group_by(country) %>%
+  summarize(count2 = sum(count)) -> join_test
+
+inequality %>%
+  group_by(country) %>%
+  summarize(this = sum(year)) -> ineq_join_test
+
+
+View(left_join(join_test, ineq_join_test))
+
+
 
 
 
