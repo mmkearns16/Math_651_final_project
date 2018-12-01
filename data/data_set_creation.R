@@ -284,29 +284,25 @@ inequality[which(inequality$year==2005),4]<-2004
 inequality[which(inequality$year==2010),4]<-2008
 inequality[which(inequality$year==2012),4]<-2012
 
-###Making it Joinable
-
-
-join_test<-base[,c(2,3)]
-
-
-join_test %>%
-  group_by(country) %>%
-  summarize(count2 = sum(count)) -> join_test
-
-inequality %>%
-  group_by(country) %>%
-  summarize(this = sum(year)) -> ineq_join_test
-
-
-View(left_join(join_test, ineq_join_test))
+setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_project/data")
+#write.csv(inequality, 'joinable_inequality.csv')
 
 
 
+hosts<-c('USA', 1984,
+'South Korea', 1988,
+'Spain', 1992,
+'USA', 1996,
+'Australia', 2000,
+'Greece', 2004,
+'China', 2008,
+'United Kingdom', 2012,
+'Brazil', 2016,
+'South Korea', 2018,
+'Japan', 2020)
 
+hosts<-data.frame(matrix(hosts, ncol = 2, byrow = T))
+colnames(hosts)<-c('country', 'year')
 
-
-
-
-
-
+setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_project/data")
+#write.csv(hosts, 'host_cities.csv')
