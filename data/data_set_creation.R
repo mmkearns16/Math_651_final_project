@@ -347,9 +347,53 @@ head(base)
 
 base$host<-ifelse(is.na(base$host), 0, 1)
 
+setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_project/raw_data")
+demo<-read.csv('democracy_data.csv', stringsAsFactors = F)
+setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_project/data")
 
 
+head(demo)
+colnames(demo)[c(2,65)]
+demo<-demo[,c(2,65)]
 
+demo %>%
+  group_by(ctryname) %>%
+  summarize(com = sum(comm))->demo
+
+demo<-demo[-1,]
+demo$com<-ifelse(demo$com == 0, 0, 1)
+
+country_names<-base%>% group_by(country) %>% summarize(count = n())
+colnames(demo)<-c('country', 'comm')
+
+
+demo[which(demo$country=='Viet Nam'),1]<-'Vietnam'
+demo[which(demo$country=='Russian Federation'),1]<-'Russia'
+demo[which(demo$country=='United States of America'),1]<-'United States'
+
+
+View(left_join(country_names, demo))
+
+##################################################################################
+setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_project/data")
+base<-read.csv('base_data.csv', stringsAsFactors = F)
+
+base<-base[,-1]
+
+base<-left_join(base, demo)
+
+base$comm_soviet<-base$soviet+base$comm
+
+yugo<-c('Croatia', 'Slovenia', 'Serbia', 'Macedonia', 'Bosnia', 'Kosovo', 'Montenegro')
+
+base[which(base$country %in% yugo),9]<-'1'
+
+base<-base[,-c(6,8)]
+
+
+dim(group_by(base, by = c('year', 'count', 'country','gdp',       'pop',  'host', 'comm_soviet')))
+
+base<-unique(base)
 
 
 
