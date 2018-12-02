@@ -1,5 +1,6 @@
 library(dplyr)
-summer             <-read.csv('summer.csv', stringsAsFactors = F)
+setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/Math_651_final_project/data")
+summer             <-read.csv('better_summer.csv', stringsAsFactors = F)
 colnames(summer)   <-sapply(colnames(summer), tolower)
 summer<-summer[which(summer$year>1990),]
 #some athletes don't have a country
@@ -106,14 +107,34 @@ setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_proje
 #write.csv(sport, 'sport_data.csv')
 
 
+
+
+
+
+
+
+summer[which(summer$country == 'Russian Federation'),1]<-'Russia'
+summer[which(summer$country == 'Great Britain'),1]<-'United Kingdom'
+
+
+
+
+
+
+
+
+
+
+
+
 ################################################################# GDP
 
 
 
 setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_project/raw_data")
 
-gdp<-read.csv('GDP.csv')
-gdp<-gdp[,c(1, seq(37, 57, 4))]
+gdp<-read.csv('GDP.csv', stringsAsFactors = F)
+gdp<-gdp[,c(1, seq(37, 61, 4))]
 
 gdp_1992<-gdp[,c(1,2)]
 gdp_1996<-gdp[,c(1,3)]
@@ -121,6 +142,7 @@ gdp_2000<-gdp[,c(1,4)]
 gdp_2004<-gdp[,c(1,5)]
 gdp_2008<-gdp[,c(1,6)]
 gdp_2012<-gdp[,c(1,7)]
+gdp_2016<-gdp[,c(1,8)]
 
 gdp_1992$year<-1992
 gdp_1996$year<-1996
@@ -128,6 +150,7 @@ gdp_2000$year<-2000
 gdp_2004$year<-2004
 gdp_2008$year<-2008
 gdp_2012$year<-2012
+gdp_2016$year<-2016
 
 
 colnames(gdp_1992)<-c('country', 'gdp', 'year')
@@ -136,18 +159,19 @@ colnames(gdp_2000)<-c('country', 'gdp', 'year')
 colnames(gdp_2004)<-c('country', 'gdp', 'year')
 colnames(gdp_2008)<-c('country', 'gdp', 'year')
 colnames(gdp_2012)<-c('country', 'gdp', 'year')
+colnames(gdp_2016)<-c('country', 'gdp', 'year')
 
-gdp<-rbind(gdp_1992, gdp_1996, gdp_2000, gdp_2004, gdp_2008, gdp_2012)
+gdp<-rbind(gdp_1992, gdp_1996, gdp_2000, gdp_2004, gdp_2008, gdp_2012, gdp_2016)
 
 # fix north korea 
 gdp[which(gdp$country=='Korea, Dem. Peopleâ€™s Rep.'),1]<-'North Korea'
 
 #######################################################################################  Population
-pop<-read.csv('Population.csv', sep = '\t')
+pop<-read.csv('Population.csv', sep = '\t', stringsAsFactors = F)
 
 colnames(pop)[57]
 
-pop<-pop[,c(1, seq(37, 57, 4))]
+pop<-pop[,c(1, seq(37, 61, 4))]
 
 
 pop_1992<-pop[,c(1,2)]
@@ -156,6 +180,7 @@ pop_2000<-pop[,c(1,4)]
 pop_2004<-pop[,c(1,5)]
 pop_2008<-pop[,c(1,6)]
 pop_2012<-pop[,c(1,7)]
+pop_2016<-pop[,c(1,8)]
 
 pop_1992$year<-1992
 pop_1996$year<-1996
@@ -163,7 +188,7 @@ pop_2000$year<-2000
 pop_2004$year<-2004
 pop_2008$year<-2008
 pop_2012$year<-2012
-
+pop_2016$year<-2016
 
 colnames(pop_1992)<-c('country', 'pop', 'year')
 colnames(pop_1996)<-c('country', 'pop', 'year')
@@ -171,8 +196,10 @@ colnames(pop_2000)<-c('country', 'pop', 'year')
 colnames(pop_2004)<-c('country', 'pop', 'year')
 colnames(pop_2008)<-c('country', 'pop', 'year')
 colnames(pop_2012)<-c('country', 'pop', 'year')
+colnames(pop_2016)<-c('country', 'pop', 'year')
 
-pop<-rbind(pop_1992, pop_1996, pop_2000, pop_2004, pop_2008, pop_2012)
+
+pop<-rbind(pop_1992, pop_1996, pop_2000, pop_2004, pop_2008, pop_2012, pop_2016)
 
 pop[which(pop$country=='Korea, Dem. People’s Rep.'),1]<-'North Korea'
 
@@ -211,7 +238,7 @@ base<-read.csv('base_data.csv', stringsAsFactors = F)
 #there are 2 algerias 1992 for some reason
 base[-1,]
 
-base<-left_join(base, demographics)
+base<-left_join(summer, demographics)
 base<-base[,-1]
 
 
@@ -290,14 +317,15 @@ setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_proje
 hosts<-c('USA', 1984,
 'South Korea', 1988,
 'Spain', 1992,
-'USA', 1996,
+'United States', 1996,
 'Australia', 2000,
 'Greece', 2004,
 'China', 2008,
 'United Kingdom', 2012,
 'Brazil', 2016,
 'South Korea', 2018,
-'Japan', 2020)
+'Japan', 2020, 
+'United States', 2024)
 
 hosts<-data.frame(matrix(hosts, ncol = 2, byrow = T))
 colnames(hosts)<-c('country', 'year')
@@ -323,10 +351,19 @@ hosts<-hosts[,-1]
 hosts[c(1,4),1]<-'United States'
 
 
-hosts_m_4$year<-hosts$year-4
-hosts_p_4$year<-hosts$year+4
-hosts_m_8$year<-hosts$year-8
-hosts_p_8$year<-hosts$year+8
+hosts$country<-as.character(hosts$country)
+hosts$year   <-as.numeric(as.character(hosts$year))
+
+
+hosts_m_4<-hosts
+hosts_p_4<-hosts
+hosts_m_8<-hosts
+hosts_p_8<-hosts
+
+hosts_m_4$year<-hosts_m_4$year-4
+hosts_p_4$year<-hosts_p_4$year+4
+hosts_m_8$year<-hosts_m_8$year-8
+hosts_p_8$year<-hosts_p_8$year+8
 
 hosts_m_4$host<-1
 hosts_p_4$host<-1
@@ -389,9 +426,7 @@ base[which(base$country %in% yugo),9]<-'1'
 base<-base[,-c(6,8)]
 
 
-dim(group_by(base, by = c('year', 'count', 'country','gdp',       'pop',  'host', 'comm_soviet')))
 
-base<-unique(base)
 
 ############################################################################# Remove NAs
 
