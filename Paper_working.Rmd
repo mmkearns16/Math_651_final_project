@@ -1,0 +1,103 @@
+```{r, include=FALSE}
+base = read.csv("~/Downloads/base_data.csv")
+
+base1 = base[which(base$year == c("1996")),]
+base2 = base[which(base$year == c("2000")),]
+base3 = base[which(base$year == c("2004")),]
+base4 = base[which(base$year == c("2008")),]
+
+base.total = rbind(base1,base2,base3,base4)
+base.totalc = base.total[complete.cases(base.total),]
+```
+Summary of Medal Count:
+```{r, echo=FALSE}
+summary(base.totalc$count)
+```
+Distribution of Medal Count:
+```{r, echo=FALSE}
+hist(base$count)
+```
+
+Distribution of Medal Count in 2008:
+```{r, echo=FALSE}
+hist(base[which(base$year == c("2008")),c("count")])
+```
+
+
+
+
+GDP Summary:
+```{r, echo=FALSE}
+summary(base.totalc$gdp)
+```
+Population Summary:
+```{r, echo=FALSE}
+summary(base.totalc$pop)
+```
+Total Count of Communist / comm_soviet Countries:
+```{r, echo=FALSE}
+sum(base.totalc$comm_soviet)
+```
+Count of host, hosted within 8 years prior, or will be hosting within 8 years:
+```{r, echo=FALSE}
+sum(base.totalc$host)
+```
+Histograms of GDP
+```{r, echo=FALSE}
+par(mfrow=c(1,2))
+#Histogram GDP
+hist(base.totalc$gdp,main = "Untransformed",xlab = "GDP")
+#Histogram log(GDP)
+hist(log(base.totalc$gdp),main = "Transformed",xlab = "log(GDP)")
+```
+\
+Histograms of Population:
+```{r, echo=FALSE}
+par(mfrow=c(1,2))
+#Histogram Population
+hist(base.totalc$pop,main = "Untransformed",xlab = "Population")
+#Histogram log(Population)
+hist(log(base.totalc$pop),main = "Transformed",xlab = "log(Population)")
+```
+\
+Boxplot of $\text{log}(\text{GDP})$:
+```{r, echo=FALSE}
+#Log(GDP)
+boxplot(log(base.totalc$gdp),ylab = "log(GDP)")
+```
+\
+Boxplot of $\text{log}(\text{Population})$:
+```{r, echo=FALSE}
+#log(Population)
+boxplot(log(base.totalc$pop),ylab = "log(Population)")
+```
+
+New Datafame to with logs:
+```{r}
+Olympic = base.totalc[,c(2,3,4,5,6,7,8)]
+Olympic[,4:5] = log(Olympic[4:5],2)
+```
+
+
+
+
+\
+Scatterplot Matrix of Variables:
+```{r, echo=FALSE}
+pairs(Olympic[,c(2,4,5,6,7)])
+```
+\
+Correlation Matrix of Predictor Variables and Response Variable:
+```{r, echo=FALSE}
+cor(Olympic[,c(2,4,5,6,7)])
+```
+
+
+
+
+Poisson Model:
+```{r}
+Olympic.pois = glm(count~gdp+pop+comm_soviet+host,data = Olympic,family = poisson)
+summary(Olympic.pois)
+```
+
