@@ -242,8 +242,6 @@ setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_proje
 #write.csv(gender, 'gender_data.csv')
 #write.csv(sport, 'sport_data.csv')
 
-
-
 #######################################################################Gender Inequality
 
 
@@ -395,5 +393,7 @@ dim(group_by(base, by = c('year', 'count', 'country','gdp',       'pop',  'host'
 
 base<-unique(base)
 
+############################################################################# Remove NAs
 
+base<-base[complete.cases(base),]
 
