@@ -306,3 +306,50 @@ colnames(hosts)<-c('country', 'year')
 
 setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/MAth_651_final_project/data")
 #write.csv(hosts, 'host_cities.csv')
+
+###################################################   USSR
+
+USSR = c("Armenia","Moldova" ,"Estonia","Latvia","Lithuania","Georgia","Azerbaijan",
+         "Tajikistan","Kyrgyzstan", "Belarus","Uzbekistan","Ukraine",
+         "Kazakhstan","Russia")
+
+
+base$soviet<-0
+base$soviet<-ifelse(test = base$country %in% USSR, yes = 1, no = 0)
+
+#####################################################    Host Cities
+
+hosts<-read.csv('host_cities.csv', stringsAsFactors = F)
+
+hosts<-hosts[,-1]
+hosts[c(1,4),1]<-'United States'
+
+
+hosts_m_4$year<-hosts$year-4
+hosts_p_4$year<-hosts$year+4
+hosts_m_8$year<-hosts$year-8
+hosts_p_8$year<-hosts$year+8
+
+hosts_m_4$host<-1
+hosts_p_4$host<-1
+hosts_m_8$host<-1
+hosts_p_8$host<-1
+
+hosts$host<-1
+
+hosts_exp<-rbind(hosts, hosts_m_4, hosts_p_4, hosts_m_8, hosts_p_8)
+
+base<-left_join(base, hosts_exp)
+
+
+
+head(base)
+
+base$host<-ifelse(is.na(base$host), 0, 1)
+
+
+
+
+
+
+
