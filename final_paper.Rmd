@@ -9,17 +9,45 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE, comment = NA)
 setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/Math_651_final_project/Data")
 base<-read.csv('base_data.csv', stringsAsFactors = F)[,-1]
+P__disp <- function(x) {
+  pr <- sum(residuals(x, type="pearson")^2)
+  dispersion <- pr/x$df.residual
+  c(pr, dispersion)
+}
+library(MASS)
 ```
 
 
 ```{r}
-Olympic.pois = glm(count~log(gdp)+log(pop)+log(gdp/pop)+comm_soviet+host,data = base,family = poisson)
-summary(Olympic.pois)
+base = read.csv("data/base_data.csv")
+head(base)
+
+base.total = base[which(base$year!=2016),]
+Olympic = base.total[,c(2,3,4,5,6,7,8)]
+
+#Clean the data (Mary to add)
+head(Olympic)
+attach(Olympic)
+
+#Make new dataframe with GDP / capita
+Olympic_v2 <- data.frame(year, country, count, log_pop = log(pop), log_gdp_pcap = log(gdp/pop), host, comm_soviet)
+head(Olympic_v2)
+
+attach(Olympic_v2)
 ```
 
 
 
+```{r}
+Olympic.pois<-glm(count~log_pop + log_gdp_pcap + host + comm_soviet, family = poisson)
+summary(Olympic.pois)
+P__disp(Olympic.pois)
+```
 
+```{r}
+Olympic.nb <- glm.nb(count~log_pop + log_gdp_pcap + host + comm_soviet)
+summary(Olympic.nb)
+```
 
 
 
