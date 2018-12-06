@@ -1,9 +1,9 @@
-<<<<<<< HEAD
+
 #Final project model building
 
 setwd('C:/Users/mpeng/Documents/Math_651_final_project/data')
 
-base = read.csv("base_data.csv")
+base = read.csv("data/base_data.csv")
 head(base)
 
 base.total = base[which(base$year!=2016),]
@@ -219,21 +219,21 @@ allModelsResults <- lapply(allModelsList,
                            function(x) lm(x, data=Olympic_v2))
 
 #PRESS
-olympic.lm = PRESS(lm(count~log_gdp+log_pop+host+comm_soviet))
-olympic.lmX1 = PRESS(lm(count~log_gdp))
-olympic.lmX2 = PRESS(lm(count~log_pop))
+olympic.nb = PRESS(olympic.nb)
+olympic.lmX1 = PRESS(lm(count~log_pop))
+olympic.lmX2 = PRESS(lm(count~log_gdp_pcap))
 olympic.lmX3 = PRESS(lm(count~host))
 olympic.lmX4 = PRESS(lm(count~comm_soviet))
-olympic.lmX1X2 = PRESS(lm(count~log_gdp+log_pop))
-olympic.lmX1X3 = PRESS(lm(count~log_gdp+host))
-olympic.lmX1X4 = PRESS(lm(count~log_gdp+comm_soviet))
-olympic.lmX2X3 = PRESS(lm(count~log_pop+host))
-olympic.lmX2X4 = PRESS(lm(count~log_pop+comm_soviet))
+olympic.lmX1X2 = PRESS(lm(count~log_pop+log_gdp_pcap))
+olympic.lmX1X3 = PRESS(lm(count~log_pop+host))
+olympic.lmX1X4 = PRESS(lm(count~log_pop+comm_soviet))
+olympic.lmX2X3 = PRESS(lm(count~log_gdp_pcap+host))
+olympic.lmX2X4 = PRESS(lm(count~log_gdp_pcap+comm_soviet))
 olympic.lmX3X4 = PRESS(lm(count~host+comm_soviet))
-olympic.lmX1X2X3 = PRESS(lm(count~log_gdp+log_pop+host))
-olympic.lmX1X2X4 = PRESS(lm(count~log_gdp+log_pop+comm_soviet))
-olympic.lmX2X3X4 = PRESS(lm(count~log_pop+host+comm_soviet))
-olympic.lmX1X3X4 = PRESS(lm(count~log_gdp+host+comm_soviet))
+olympic.lmX1X2X3 = PRESS(lm(count~log_pop+log_gdp_pcap+host))
+olympic.lmX1X2X4 = PRESS(lm(count~log_pop+log_gdp_pcap+comm_soviet))
+olympic.lmX2X3X4 = PRESS(lm(count~log_gdp_pcap+host+comm_soviet))
+olympic.lmX1X3X4 = PRESS(lm(count~log_pop+host+comm_soviet))
 
 olympic.lm_press <- rbind(olympic.lmX1$stat,
                           olympic.lmX3$stat,
