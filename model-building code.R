@@ -219,7 +219,7 @@ allModelsResults <- lapply(allModelsList,
                            function(x) lm(x, data=Olympic_v2))
 
 #PRESS
-olympic.nb = PRESS(olympic.nb)
+olympic.lm = PRESS(olympic.lm2)
 olympic.lmX1 = PRESS(lm(count~log_pop))
 olympic.lmX2 = PRESS(lm(count~log_gdp_pcap))
 olympic.lmX3 = PRESS(lm(count~host))
