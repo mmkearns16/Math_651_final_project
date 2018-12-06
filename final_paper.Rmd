@@ -2,66 +2,159 @@
 title: "Math 651 Final Project"
 author: "Mary Peng, Hillary Dunn, and Max Kearns"
 date: "December 17, 2018"
-output: pdf_document
+output: 
+  pdf_document:
+    number_sections: true
 ---
 
 ```{r setup, include=FALSE, cache = T}
-knitr::opts_chunk$set(echo = TRUE, comment = NA)
-setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/Math_651_final_project/Data")
-base<-read.csv('base_data.csv', stringsAsFactors = F)[,-1]
+knitr::opts_chunk$set(echo = FALSE, comment = NA)
+base<-read.csv('data/base_data.csv', stringsAsFactors = F)
 P__disp <- function(x) {
   pr <- sum(residuals(x, type="pearson")^2)
   dispersion <- pr/x$df.residual
   c(pr, dispersion)
 }
+library(dplyr)
 library(qpcR)
 library(MuMIn)
-library(leaps)
-library(MASS)
-```
-
-
-```{r}
-base = read.csv("data/base_data.csv")
-head(base)
 
 base.total = base[which(base$year!=2016),]
 Olympic = base.total[,c(2,3,4,5,6,7,8)]
 
 #Clean the data (Mary to add)
-head(Olympic)
-attach(Olympic)
 
 #Make new dataframe with GDP / capita
-Olympic_v2 <- data.frame(year, country, count, log_pop = log(pop), log_gdp_pcap = log(gdp/pop), host, comm_soviet)
-head(Olympic_v2)
+Olympic_v2 <- data.frame(year = Olympic$year, country = Olympic$country, count = Olympic$count, log_pop = log(Olympic$pop), log_gdp_pcap = log(Olympic$gdp/Olympic$pop), host = Olympic$host, comm_soviet = Olympic$comm_soviet)
 
-attach(Olympic_v2)
+
+```
+
+
+# Abstract 
+
+# Introduction---needs editing
+
+Every four summers, the Olympic Games become the center of the world’s attention, as elite athletes seek honor for both themselves and for their countries. Many countries associate tremendous national pride with their medal counts, since a nation’s athletic competence also projects its soft power. For this last reason, some governments invest generously in their sports programs, in hopes of an elevated medal count in the next Olympics.
+
+Given the fierce competition and high profile nature of medal counts, one may wonder what factors influence the number of medals that a country wins at the summer Olympics. Certainly countries with the largest economies and populations, such as the United States and China, commonly dominate the top of the billboard. However, Azerbaijan, which ranks 91st in population and 72nd in total GDP, also ranked in the top 20 countries by total medal count in the 2016 Summer Olympics. 
+
+Our team will develop a multiple linear regression model using various predictors, such as GDP, population size, size of athletic investment, and geographic location, to predict medal count. We will build the model on countries’ total medal count for the 2004, 2008, and 2012 Olympics, and then project the model onto the 2016 Olympics to understand the accuracy of the model’s predictions. 
+
+
+# Methods and Materials
+
+## Data 
+
+Frame this as if our only data is population, per capita GDP, host, and soviet/communist
+
+### EDA--choose what we want to keep, and then format as figures in Appendix
+
+Summary of Medal Count:
+```{r, include = F, echo=FALSE}
+library(knitr)
+summary(base$count)
+```
+Distribution of Medal Count:
+
+```{r medal_count_hist, include = F, echo=FALSE}
+hist(base$count)
+```
+
+Distribution of Medal Count in 2008:
+
+```{r count_2008_hist, echo=FALSE, include = F}
+hist(base[which(base$year == c("2008")),c("count")])
+```
+
+GDP Summary:
+```{r, echo=FALSE, include = F}
+summary(base$gdp)
+```
+Population Summary:
+```{r, echo=FALSE, include = F}
+summary(base$pop)
+```
+Total Count of Communist / comm_soviet Countries:
+```{r, echo=FALSE, include = F}
+sum(base$comm_soviet)
+nrow(base)-sum(base$comm_soviet)
+```
+Count of host, hosted within 8 years prior, or will be hosting within 8 years:
+```{r, echo=FALSE, include = F}
+sum(base$host)
+```
+
+Histograms of Population:
+```{r pop_hists, echo=FALSE, include = F}
+par(mfrow=c(1,2))
+#Histogram Population
+hist(base$pop,main = "Untransformed",xlab = "Population")
+#Histogram log(Population)
+hist(log(base$pop),main = "Transformed",xlab = "log(Population)")
+```
+
+
+Boxplot of $\text{log}(\text{GDP})$:
+```{r log_gdp_box, echo=FALSE, include = F}
+#Log(GDP)
+boxplot(log(base$gdp),ylab = "log(GDP)")
+```
+
+Boxplot of $\text{log}(\text{Population})$:
+```{r log_pop_box, echo=FALSE, include = F}
+#log(Population)
+boxplot(log(base$pop),ylab = "log(Population)")
+```
+
+
+Scatterplot Matrix of Variables:
+```{r scatter_mat, echo=FALSE, include = F}
+pairs(Olympic[,c(2,4,5,6,7)])
+```
+
+Correlation Matrix of Predictor Variables and Response Variable:
+```{r corr_mat, include = F, echo=FALSE}
+kable(cor(Olympic[,c(2,4,5,6,7)]))
 ```
 
 
 
-```{r}
-Olympic.pois<-glm(count~log_pop + log_gdp_pcap + host + comm_soviet, family = poisson)
-summary(Olympic.pois)
+## Model Building and Selection
+
+### Linear Model
+
+### Generalized Linear Model
+
+The first choice for a glm is typically a Poisson model, which may provide a reasonable model for these data. This generalized model was created with the same variables as the linear model; population, GDP per capita, the host dummy variable, and the communist/soviet dummy variable. Like the linear model, the population and GDP per capita were log-transformed, but in this model it is unnecessary to transform the medal count. The full poisson model showed highly significant parameters, but the dispersion of this model was much greater than 1 (disp = 6.621), so a negative binomial model would likely provide a better fit for these data. 
+
+
+```{r, comment = NA, include=F}
+Olympic.pois<-glm(count~log_pop + log_gdp_pcap + host + comm_soviet, data = Olympic_v2, family = poisson)
 P__disp(Olympic.pois)
 ```
 
-```{r negative binomial}
-olympic.nb <- glm.nb(count~log_pop + log_gdp_pcap + host + comm_soviet)
-summary(olympic.nb)
+```{r negative binomial, echo = F}
+library(MASS)
+olympic.nb <- glm.nb(count~log_pop + log_gdp_pcap + host + comm_soviet, data = Olympic_v2)
 ```
 
 
 
-```{r nb leaps}
-olympic.nb_leap <- leaps(y=count, x=Olympic_v2[,4:7])
+```{r nb leaps, echo = F}
+library(leaps)
+olympic.nb_leap <- leaps(y=Olympic_v2$count, x=Olympic_v2[,4:7])
 Cp.nb<-round(olympic.nb_leap$Cp, 2)
 
-cbind(olympic.nb_leap$which, olympic.nb_leap$size, Cp.nb)
+which<-olympic.nb_leap$which
+rownames(which) <-NULL
+colnames(which)<-c('Pop', 'GDP/C', 'Host', 'Soviet')
 ```
 
-```{r weird algorithm thing}
+A negative binomial regression model assumes that dispersion is greater than 1, which is consistent with these data. Therefore, it allows for more accurate tests of the parameters. The best model again proved to be the full model, after a comparison of AIC between all subsets of variables (Table 2).
+
+
+```{r weird algorithm thing, echo = F}
 xList <- names(Olympic_v2)[4:7]
 vec <- olympic.nb_leap$which
 
@@ -78,44 +171,37 @@ allModelsResults <- lapply(allModelsList,
 
 
 AIC.nb<-matrix(unlist(lapply(allModelsResults, function(x) round(extractAIC(x),2))), ncol = 2, byrow = T)[,2]
-
-cbind(olympic.nb_leap$which, olympic.nb_leap$size, Cp.nb, AIC.nb)
+library(knitr)
 ```
-```{r PRESS}
-#PRESS
-olympic.nb = PRESS(olympic.nb)
-olympic.nbX1 = PRESS(glm.nb(count~log_pop))
-olympic.nbX2 = PRESS(glm.nb(count~log_gdp_pcap))
-olympic.nbX3 = PRESS(glm.nb(count~host))
-olympic.nbX4 = PRESS(glm.nb(count~comm_soviet))
-olympic.nbX1X2 = PRESS(glm.nb(count~log_pop+log_gdp_pcap))
-olympic.nbX1X3 = PRESS(glm.nb(count~log_pop+host))
-olympic.nbX1X4 = PRESS(glm.nb(count~log_pop+comm_soviet))
-olympic.nbX2X3 = PRESS(glm.nb(count~log_gdp_pcap+host))
-olympic.nbX2X4 = PRESS(glm.nb(count~log_gdp_pcap+comm_soviet))
-olympic.nbX3X4 = PRESS(glm.nb(count~host+comm_soviet))
-olympic.nbX1X2X3 = PRESS(glm.nb(count~log_pop+log_gdp_pcap+host))
-olympic.nbX1X2X4 = PRESS(glm.nb(count~log_pop+log_gdp_pcap+comm_soviet))
-olympic.nbX2X3X4 = PRESS(glm.nb(count~log_gdp_pcap+host+comm_soviet))
-olympic.nbX1X3X4 = PRESS(glm.nb(count~log_pop+host+comm_soviet))
 
-PRESS.nb <- rbind(olympic.nbX1$stat,
-                          olympic.nbX3$stat,
-                          olympic.nbX2$stat,
-                          olympic.nbX4$stat,
-                          olympic.nbX1X3$stat,
-                          olympic.nbX1X2$stat,
-                          olympic.nbX1X4$stat,
-                          olympic.nbX2X3$stat,
-                          olympic.nbX3X4$stat,
-                          olympic.nbX2X4$stat,
-                          olympic.nbX1X2X3$stat,
-                          olympic.nbX1X2X4$stat,
-                          olympic.nbX1X3X4$stat,
-                          olympic.nbX2X3X4$stat,
-                          olympic.nb$stat)
+# Results 
 
-cbind(olympic.nb_leap$which, Size = olympic.nb_leap$size, Cp.nb, AIC.nb, 'PRESS.nb'=PRESS.nb)
+# Discussion and Conclusions
+
+\newpage
+# Bibliography
+
+
+\newpage
+# Appendix A
+
+
+```{r, echo = F}
+kable(cbind(which, Parameters = olympic.nb_leap$size, Cp.nb, AIC.nb), caption = 'Model Selection Diagnostics for a Negative Binomial Model', format.args = list(justify = 'centre'))
+```
+
+```{r, echo = F}
+tab<-summary(olympic.nb)$coefficients
+colnames(tab)[4]<-'p-value'
+rownames(tab)<-c('Intercept', 'log(population)', 'log(gdp/capita)', 'Host', 'Comm/Soviet')
+kable(tab, format.args = list(justify = 'centre'), caption = 'Negative Binomial Model Coefficients')
+
+```
+
+\newpage
+
+# Appendix B
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
 ```
 
 
