@@ -5,7 +5,7 @@ date: "December 17, 2018"
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, cache = T}
 knitr::opts_chunk$set(echo = TRUE, comment = NA)
 setwd("C:/Users/Max/Documents/Georgetown/Math651_Regression/Math_651_final_project/Data")
 base<-read.csv('base_data.csv', stringsAsFactors = F)[,-1]
@@ -14,6 +14,9 @@ P__disp <- function(x) {
   dispersion <- pr/x$df.residual
   c(pr, dispersion)
 }
+library(qpcR)
+library(MuMIn)
+library(leaps)
 library(MASS)
 ```
 
@@ -44,12 +47,76 @@ summary(Olympic.pois)
 P__disp(Olympic.pois)
 ```
 
-```{r}
-Olympic.nb <- glm.nb(count~log_pop + log_gdp_pcap + host + comm_soviet)
-summary(Olympic.nb)
+```{r negative binomial}
+olympic.nb <- glm.nb(count~log_pop + log_gdp_pcap + host + comm_soviet)
+summary(olympic.nb)
 ```
 
 
+
+```{r nb leaps}
+olympic.nb_leap <- leaps(y=count, x=Olympic_v2[,4:7])
+Cp.nb<-round(olympic.nb_leap$Cp, 2)
+
+cbind(olympic.nb_leap$which, olympic.nb_leap$size, Cp.nb)
+```
+
+```{r weird algorithm thing}
+xList <- names(Olympic_v2)[4:7]
+vec <- olympic.nb_leap$which
+
+#Name the columns in the grid
+names(vec) <- paste("X", 1:4, sep="")
+
+#Build matrix of formula for every row
+allModelsList <- apply(vec, 1, function(x) as.formula(
+  paste(c("count ~ 1", xList[x]), collapse = "+")))
+
+#Calculate the coefficients for all 16 models
+allModelsResults <- lapply(allModelsList, 
+                           function(x) glm.nb(x, data=Olympic_v2))
+
+
+AIC.nb<-matrix(unlist(lapply(allModelsResults, function(x) round(extractAIC(x),2))), ncol = 2, byrow = T)[,2]
+
+cbind(olympic.nb_leap$which, olympic.nb_leap$size, Cp.nb, AIC.nb)
+```
+```{r PRESS}
+#PRESS
+olympic.nb = PRESS(olympic.nb)
+olympic.nbX1 = PRESS(glm.nb(count~log_pop))
+olympic.nbX2 = PRESS(glm.nb(count~log_gdp_pcap))
+olympic.nbX3 = PRESS(glm.nb(count~host))
+olympic.nbX4 = PRESS(glm.nb(count~comm_soviet))
+olympic.nbX1X2 = PRESS(glm.nb(count~log_pop+log_gdp_pcap))
+olympic.nbX1X3 = PRESS(glm.nb(count~log_pop+host))
+olympic.nbX1X4 = PRESS(glm.nb(count~log_pop+comm_soviet))
+olympic.nbX2X3 = PRESS(glm.nb(count~log_gdp_pcap+host))
+olympic.nbX2X4 = PRESS(glm.nb(count~log_gdp_pcap+comm_soviet))
+olympic.nbX3X4 = PRESS(glm.nb(count~host+comm_soviet))
+olympic.nbX1X2X3 = PRESS(glm.nb(count~log_pop+log_gdp_pcap+host))
+olympic.nbX1X2X4 = PRESS(glm.nb(count~log_pop+log_gdp_pcap+comm_soviet))
+olympic.nbX2X3X4 = PRESS(glm.nb(count~log_gdp_pcap+host+comm_soviet))
+olympic.nbX1X3X4 = PRESS(glm.nb(count~log_pop+host+comm_soviet))
+
+PRESS.nb <- rbind(olympic.nbX1$stat,
+                          olympic.nbX3$stat,
+                          olympic.nbX2$stat,
+                          olympic.nbX4$stat,
+                          olympic.nbX1X3$stat,
+                          olympic.nbX1X2$stat,
+                          olympic.nbX1X4$stat,
+                          olympic.nbX2X3$stat,
+                          olympic.nbX3X4$stat,
+                          olympic.nbX2X4$stat,
+                          olympic.nbX1X2X3$stat,
+                          olympic.nbX1X2X4$stat,
+                          olympic.nbX1X3X4$stat,
+                          olympic.nbX2X3X4$stat,
+                          olympic.nb$stat)
+
+cbind(olympic.nb_leap$which, Size = olympic.nb_leap$size, Cp.nb, AIC.nb, 'PRESS.nb'=PRESS.nb)
+```
 
 
 
