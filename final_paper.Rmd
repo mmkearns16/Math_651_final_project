@@ -44,8 +44,6 @@ Our team will develop multiple regression models using various predictors, such 
 
 ## Data 
 
-Frame this as if our only data is population, per capita GDP, host, and soviet/communist
-
 ### EDA--choose what we want to keep, and then format as figures in Appendix
 
 Summary of Medal Count:
@@ -92,7 +90,6 @@ hist(base$pop,main = "Untransformed",xlab = "Population")
 hist(log(base$pop),main = "Transformed",xlab = "log(Population)")
 ```
 
-
 Boxplot of $\text{log}(\text{GDP})$:
 ```{r log_gdp_box, echo=FALSE, include = F}
 #Log(GDP)
@@ -105,7 +102,6 @@ Boxplot of $\text{log}(\text{Population})$:
 boxplot(log(base$pop),ylab = "log(Population)")
 ```
 
-
 Scatterplot Matrix of Variables:
 ```{r scatter_mat, echo=FALSE, include = F}
 pairs(Olympic[,c(2,4,5,6,7)])
@@ -116,8 +112,6 @@ Correlation Matrix of Predictor Variables and Response Variable:
 kable(cor(Olympic[,c(2,4,5,6,7)]))
 ```
 
-
-
 ## Model Building and Selection
 
 ### Linear Model
@@ -125,7 +119,6 @@ kable(cor(Olympic[,c(2,4,5,6,7)]))
 ### Generalized Linear Model
 
 The first choice for a glm is typically a Poisson model, which may provide a reasonable model for these data. This generalized model was created with the same variables as the linear model; population, GDP per capita, the host dummy variable, and the communist/soviet dummy variable. Like the linear model, the population and GDP per capita were log-transformed, but in this model it is unnecessary to transform the medal count. The full poisson model showed highly significant parameters, but the dispersion of this model was much greater than 1 (disp. = 6.621), so a negative binomial model would likely provide a better fit for these data. 
-
 
 ```{r, comment = NA, include=F}
 Olympic.pois<-glm(count~log_pop + log_gdp_pcap + host + comm_soviet, data = Olympic_v2, family = poisson)
@@ -136,8 +129,6 @@ P__disp(Olympic.pois)
 library(MASS)
 olympic.nb <- glm.nb(count~log_pop + log_gdp_pcap + host + comm_soviet, data = Olympic_v2)
 ```
-
-
 
 ```{r nb leaps, echo = F}
 library(leaps)
@@ -150,7 +141,6 @@ colnames(which)<-c('Pop', 'GDP/C', 'Host', 'Soviet')
 ```
 
 A negative binomial regression model assumes that dispersion is greater than 1, which is consistent with these data. Therefore, it allows for more accurate tests of the parameters. Among the negative binomial models, the best model again proved to be the full model, after a comparison of AIC between all subsets of variables (Table 2).
-
 
 ```{r weird algorithm thing, echo = F}
 xList <- names(Olympic_v2)[4:7]
@@ -179,10 +169,8 @@ library(knitr)
 \newpage
 # Bibliography
 
-
 \newpage
 # Appendix A
-
 
 ```{r, echo = F}
 kable(cbind(which, Parameters = olympic.nb_leap$size, Cp.nb, AIC.nb), caption = 'Model Selection Diagnostics for a Negative Binomial Model', format.args = list(justify = 'centre'))
@@ -201,7 +189,6 @@ tab<-summary(olympic.nb)$coefficients
 colnames(tab)[4]<-'p-value'
 rownames(tab)<-c('Intercept', 'log(Population)', 'log(GDP/Capita)', 'Host', 'Comm/Soviet')
 kable(tab, format.args = list(justify = 'centre'), caption = 'Negative Binomial Model Coefficients')
-
 ```
 
 \newpage
