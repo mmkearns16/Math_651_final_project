@@ -153,7 +153,7 @@ names(vec) <- paste("X", 1:4, sep="")
 allModelsList <- apply(vec, 1, function(x) as.formula(
   paste(c("count ~ 1", xList[x]), collapse = "+")))
   ### Calculate the coefficients for all 16 models
-allModelsResults <- lapply(allModelsList, 
+allModelsResults.lm <- lapply(allModelsList, 
                            function(x) lm(x, data=Olympic_v2))
 
 ```
@@ -192,8 +192,6 @@ bptest(log_count ~ log_pop + log_gdp_per_cap + host + comm_soviet,data = Olympic
 ```
 The p-value $= 0.001587<\alpha$, therefore we accept the alternative hypothesis that our variance is not constant.
 
-Test for normality (Lilliefors Test):\
-Alternatives:
 $$H_0: \text{Sample comes from a N(}\mu,\sigma^2\text{) distribution}$$
 $$H_a: \text{Sample does not come from a N(}\mu,\sigma^2\text{) distribution}$$
 Decision Rule: At signifcance level $\alpha = 0.05$, if the p-value is less than $\alpha$ then we accept $H_a$ and reject $H_0$, otherwise we fail to reject $H_0$.
@@ -349,7 +347,7 @@ olympic.lm_press <- rbind(olympic.lmX1$stat,
 
 #Summary
 Diagnostics = cbind(olympic.leapCP$which, Cp=round(olympic.leapCP$Cp,2), aR2=round(olympic.leapR2a$adjr2,2),
-      AIC=matrix(unlist(lapply(allModelsResults, function(x) round(extractAIC(x),2))), ncol=2, byrow=TRUE)[,2], PRESS = olympic.lm_press)
+      AIC=matrix(unlist(lapply(allModelsResults.lm, function(x) round(extractAIC(x),2))), ncol=2, byrow=TRUE)[,2], PRESS = olympic.lm_press)
 #PRESS wasn't showing as column name
 colnames(Diagnostics) = c("1","2","3","4","Cp","aR2","AIC","PRESS")
 ```
@@ -371,13 +369,47 @@ kable(Diagnostics, caption = 'Model Selection for Linear Model')
 kable(cbind(which, Parameters = olympic.nb_leap$size, Cp.nb, AIC.nb), caption = 'Model Selection Diagnostics for a Negative Binomial Model', format.args = list(justify = 'centre'))
 ```
 
-```{r, echo = F}
-tab<-summary(olympic.nb)$coefficients
-colnames(tab)[4]<-'p-value'
-rownames(tab)<-c('Intercept', 'log(Population)', 'log(GDP/Capita)', 'Host', 'Comm/Soviet')
-kable(tab, format.args = list(justify = 'centre'), caption = 'Negative Binomial Model Coefficients')
+\newpage
+
+```{r AIC_comp, echo = F}
+df_20<-data.frame(matrix(c(2008.82, 0.751, 2319.23,  0.8220021), nrow = 2, byrow = T))
+colnames(df_20)<-c('AIC', 'MSE')
+rownames(df_20)<-c('Linear', 'Negative Binomial')
+kable(df_20, caption = 'Linear vs GLM Model Comparison')
 ```
 
+\newpage
+
+```{r pred_vs_act, echo = F, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Comparison of Predicted vs. Actual'}
+par(mfrow=c(1,2))
+plot(x=Olympic_v2$count, y = exp(olympic.lmfinal$fitted.values), col='blue', pch=20, xlab='Actual',
+     ylab='Predicted', main='OLS Linear Regression')
+abline(a=0,b=1, col='red')
+
+plot(x=Olympic_v2$count, y = olympic.nb$fitted.values, col='blue', pch=20, xlab='Actual',
+     ylab='Predicted', main='Negative Binomial Regression')
+abline(a=0,b=1, col='red')
+```
+
+```{r coeff, echo = F}
+df_133<-data.frame(matrix(c(
+'-9.63 (0.638)', '-10.04 (0.67)','-11.23 (0.254)','-10.17 (0.647)','-10.57 (0.641)',
+'0.408 (0.032)','0.412 (0.034)','0.521 (0.014)','0.402 (0.029)','0.452 (0.033)',
+'0.443 (0.029)','0.464 (0.031)','0.505 (0.010)','0.498 (0.032)','0.506 (0.028)',
+'0.867 (0.190)','0.829 (0.199)','0.311 (0.042)','0.693 (0.159)','0.608 (0.153)',
+'1.033 (0.105)','1.04 (0.110)','1.02 (0.037)','1.03 (0.098)','1.08 (0.097)'
+), ncol = 5, byrow = T))
+
+colnames(df_133)<-c(
+'Linear',
+'Robust (Bisquare)',
+'Poisson',
+'Neg Binom',
+'Neg Binom (fixed effects)')
+rownames(df_133)<-c('Intercept','log(GDP/Cap)','log(Pop)','Host','Soviet/Comm')
+
+kable(df_133, caption = 'Coefficient Comparison')
+```
 
 
 \newpage
