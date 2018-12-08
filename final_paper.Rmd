@@ -180,10 +180,10 @@ plot(olympic.lmfinal)
 
 According to the Normal Q-Q plot (Figure X), it is reasonable to assume the residuals follow a normal distribution. Hoever, the Residuals vs Fitted plot indicates possible heteroskedasticity or non-constant variance of the errors. The Breusch-Pagan test will help us determine if heteroskedasticity is affecting the model.
 
-Breusch Pagan Test: Assuming $Var(\epsilon_i)=\sigma^2_i$ such that $\text{log}_e\sigma_i^2=\gamma_0+\gamma_1X_i$:
-Alternatives:
+Assuming $Var(\epsilon_i)=\sigma^2_i$ such that $\text{log}_e\sigma_i^2=\gamma_0+\gamma_1X_i$:
+
 $$H_0:\gamma_1,\text{vs. } H_a:\gamma_1\neq0$$
-Decision Rule: At significance level $\alpha = 0.05$, if the p-value of the Breusch-Pagan test is less than $\alpha$ then we reject $H_0$ and accept $H_a$, otherwise we fail to reject $H_0$. Accepting $H_a$ means we accept that the variance is non-constant.
+At significance level $\alpha = 0.05$, if the p-value of the Breusch-Pagan test is less than $\alpha$ then we reject $H_0$ and accept $H_a$, otherwise we fail to reject $H_0$. Accepting $H_a$ means we accept that the variance is non-constant.
 
 ```{r, include=FALSE}
 library(lmtest)
@@ -224,7 +224,13 @@ olympic.lm_inf[idx,]
 
 ### Generalized Linear Model
 
-The first choice for a glm is typically a Poisson model, which may provide a reasonable model for these data. This generalized model was created with the same variables as the linear model; population, GDP per capita, the host dummy variable, and the communist/soviet dummy variable. Like the linear model, the population and GDP per capita were log-transformed, but in this model it is unnecessary to transform the medal count. The full poisson model showed highly significant parameters, but the dispersion of this model was much greater than 1 (disp. = 6.621), so a negative binomial model would likely provide a better fit for these data. 
+The first choice for a glm is typically a Poisson model, which may provide a reasonable model for these data. This generalized model was created with the same variables as the linear model; population, GDP per capita, the host dummy variable, and the communist/soviet dummy variable. 
+
+$$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = \beta_0+\beta_1X_1+\beta_2X_2+\beta_3X_3+\beta_4X_4$$
+$$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = -11.28882+0.50479X_1+0.52117X_2+0.31070X_3+1.02332X_4$$
+
+
+Like the linear model, the population and GDP per capita were log-transformed, but in this model it is unnecessary to transform the medal count. The full poisson model showed highly significant parameters, but the dispersion of this model was much greater than 1 (disp. = 6.621). This is a violation of the assumptions of a Poisson regression model, so a negative binomial model would likely provide a better fit for these data. 
 
 ```{r, comment = NA, include=F}
 Olympic.pois<-glm(count~log_pop + log_gdp_per_cap + host + comm_soviet, data = Olympic_v2, family = poisson)
@@ -246,7 +252,10 @@ rownames(which) <-NULL
 colnames(which)<-c('Pop', 'GDP/C', 'Host', 'Soviet')
 ```
 
-A negative binomial regression model assumes that dispersion is greater than 1, which is consistent with these data. Therefore, it allows for more accurate tests of the parameters. Among the negative binomial models, the best model again proved to be the full model, after a comparison of AIC between all subsets of variables (Table 2).
+A negative binomial regression model assumes that dispersion is greater than 1, which is consistent with these data. Therefore, it allows for more accurate tests of the parameters. Among the negative binomial models, the best model again proved to be the full model, after a comparison of AIC between all subsets of variables (Table X).
+
+$$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = \beta_0+\beta_1X_1+\beta_2X_2+\beta_3X_3+\beta_4X_4$$
+$$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = -10.16577+0.49848X_1+0.40239X_2+0.69267X_3+1.03376X_4$$
 
 ```{r weird algorithm thing, echo = F}
 xList <- names(Olympic_v2)[4:7]
