@@ -244,6 +244,34 @@ $$H_0: \text{Sample comes from a N(}\mu,\sigma^2\text{) distribution}$$
 $$H_a: \text{Sample does not come from a N(}\mu,\sigma^2\text{) distribution}$$
 Decision Rule: At signifcance level $\alpha = 0.05$, if the p-value is less than $\alpha$ then we accept $H_a$ and reject $H_0$, otherwise we fail to reject $H_0$.
 
+```{r, include=FALSE}
+library(nortest)
+```
+```{r}
+lillie.test(olympic.lmfinal$residuals)
+```
+The p-value$=0.2332>\alpha$, thus we fail to reject $H_0$. Therefore, it is reasonable to assume that the error terms are distributed normally.
+
+#Diagnostics
+vif(olympic.lmfinal)
+
+Influential Cases:
+```{r}
+#Influential cases
+olympic.lm_inf=influence.measures(olympic.lmfinal)$is.inf
+idx=which(apply(olympic.lm_inf,1,any))
+
+Olympic[idx,]
+```
+
+
+APPENDIX:
+A. Influential Cases by test:
+```{r}
+olympic.lm_inf[idx,]
+```
+
+
 ### Generalized Linear Model
 
 The first choice for a glm is typically a Poisson model, which may provide a reasonable model for these data. This generalized model was created with the same variables as the linear model; population, GDP per capita, the host dummy variable, and the communist/soviet dummy variable. Like the linear model, the population and GDP per capita were log-transformed, but in this model it is unnecessary to transform the medal count. The full poisson model showed highly significant parameters, but the dispersion of this model was much greater than 1 (disp. = 6.621), so a negative binomial model would likely provide a better fit for these data. 
