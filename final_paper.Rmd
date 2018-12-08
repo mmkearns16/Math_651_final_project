@@ -44,7 +44,31 @@ Our team will develop multiple regression models using various predictors, such 
 
 ## Data 
 
+The purpose of this reasearch is to determine whether there is a predictive relationship between popluation, GDP per capita, being a host nation, or at one point being a Communist nation or a member of the Soviet Union and number of medals won at the Olympics in the associated year by country.
+
 ### EDA--choose what we want to keep, and then format as figures in Appendix
+
+As we can see IN FIGURE..., the average number of medals won by a country in a year is 11.79 medals and the minimum number of medals is one. This is meaningful because this means we are only assessing countries that have won at least one medal in at least one of the years we are analyzing.
+
+Below we see that the medal count is distributed exponentially, which could indicate a need to transform the response variable if we need to fit a linear regression model.
+
+$X_1$: This variable indicates population of people in the country in the associated year. Below, we can see a histogram of the population data. On the left, is the original distribution of the data points and on the right, we've transformed the data to look more normally distributed.
+
+$X_2$: This variable indicates GDP per capita in the associated year. Below, we can see a histogram of the GDP per capita data. On the left, is the original distribution of the data points and on the right, we've transformed the data to look more normally distributed.
+
+$X_3$: This binary predictor variable indicates with a 1 if a country hosted the Olympics within the previous 8 years, whether the country is hosting the Olympics in that year, or if the country is hosting within 8 years in the future. Of all the data points, 25 are classified as host within 8 years prior, current host or future host within 8 years. This makes sense because we are considering 5 years in our training data and each year has five countries that can be classified by this predictor variable.\
+$X_4$: This binary predictor variable indicates whether the country was once a member of the Soviet Union or if they were indicated as ever being a Communist country. From __________ we aggregated a binary predictor variable that identifies countries that were once members of the Soviet Union or at one time classified as communist countries. 111 data points are classified as former Soviet Union or Communist.(INSERT SOURCE AGAIN???)
+
+In addition to the predictors and response variable, each data point has an associated country and year.
+
+INSERT WHY WE DECIDED TO GO WITH LOG OF VARIABLES
+
+
+To properly determine an ideal model for the data, we need to address the relationships between variables. We can do this be analyzing both the scatterplot matrix of variables and the correlation matrix.
+
+The scatterplot matrix does not obviously show us many relationships between the predictor variables and their effect on the response variable. While there might be a relationship between the log of the population and the medal count, it is difficult to determine from the plot if this is a linear relationship. Additional information can be collected from the correlation matrix below.
+
+This correlation matrix suggests that collinearity between variables will not be a significant issue. The most significant correlation between predictor variables is between the log of the GDP per capita and the indicator of Communism or Soviet Union inclusion variable. However, the correlation coefficient is only -0.2989.
 
 Summary of Medal Count:
 ```{r, include = F, echo=FALSE}
@@ -115,6 +139,65 @@ kable(cor(Olympic[,c(2,4,5,6,7)]))
 ## Model Building and Selection
 
 ### Linear Model
+
+```{r, include=FALSE}
+library(leaps)
+#CP
+olympic.leapCP <- leaps(y=log(Olympic_v2$count), x=Olympic_v2[,4:7])
+#R2a
+olympic.leapR2a <- leaps(y=log(Olympic_v2$count), x=Olympic_v2[,4:7], method = 'adjr2')
+
+  ### Code for AIC
+xList <- names(Olympic_v2)[4:7]
+  #### Remove the last row that has all False's
+vec <- olympic.leapCP$which
+  ### Name the columns in the grid
+names(vec) <- paste("X", 1:4, sep="")
+  #### Build matrix of formula for every row
+allModelsList <- apply(vec, 1, function(x) as.formula(
+  paste(c("count ~ 1", xList[x]), collapse = "+")))
+  ### Calculate the coefficients for all 16 models
+allModelsResults <- lapply(allModelsList, 
+                           function(x) lm(x, data=Olympic_v2))
+
+```
+
+```{r, eval=FALSE, include=FALSE}
+#PRESS (Non-Mac)
+library(qpcR)
+olympic.lm = PRESS(lm(log(count)~log_pop+log_gdp_per_cap+host+comm_soviet))
+olympic.lmX1 = PRESS(lm(log(count)~log_pop))
+olympic.lmX2 = PRESS(lm(log(count)~log_gdp_per_cap))
+olympic.lmX3 = PRESS(lm(log(count)~host))
+olympic.lmX4 = PRESS(lm(log(count)~comm_soviet))
+olympic.lmX1X2 = PRESS(lm(log(count)~log_pop+log_gdp_per_cap))
+olympic.lmX1X3 = PRESS(lm(log(count)~log_gdp_per_cap+host))
+olympic.lmX1X4 = PRESS(lm(log(count)~log_pop+comm_soviet))
+olympic.lmX2X3 = PRESS(lm(log(count)~log_gdp_per_cap+host))
+olympic.lmX2X4 = PRESS(lm(log(count)~log_gdp_per_cap+comm_soviet))
+olympic.lmX3X4 = PRESS(lm(log(count)~host+comm_soviet))
+olympic.lmX1X2X3 = PRESS(lm(log(count)~log_pop+log_gdp_per_cap+host))
+olympic.lmX1X2X4 = PRESS(lm(log(count)~log_pop+log_gdp_per_cap+comm_soviet))
+olympic.lmX2X3X4 = PRESS(lm(log(count)~log_gdp_per_cap+host+comm_soviet))
+olympic.lmX1X3X4 = PRESS(lm(log(count)~log_pop+host+comm_soviet))
+
+olympic.lm_press <- rbind(olympic.lmX1$stat,
+                          olympic.lmX3$stat,
+                          olympic.lmX2$stat,
+                          olympic.lmX4$stat,
+                          olympic.lmX1X3$stat,
+                          olympic.lmX1X2$stat,
+                          olympic.lmX1X4$stat,
+                          olympic.lmX2X3$stat,
+                          olympic.lmX3X4$stat,
+                          olympic.lmX2X4$stat,
+                          olympic.lmX1X2X3$stat,
+                          olympic.lmX1X2X4$stat,
+                          olympic.lmX1X3X4$stat,
+                          olympic.lmX2X3X4$stat,
+                          olympic.lm$stat)
+```
+
 
 ### Generalized Linear Model
 
