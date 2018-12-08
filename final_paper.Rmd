@@ -159,7 +159,7 @@ allModelsResults.lm <- lapply(allModelsList,
 ```
 
 
-According to the selected model diagnostics shown in Table 3, the model with the smallest $C_p$ statistic, largest adjusted $R^2$ value, smallest AIC and smallest PRESS value is the model that includes all four predictor variables. We constructed a linear model (shown below), using the natural log to transform the count data.
+According to the selected model diagnostics shown in Table 3, the model with the smallest $C_p$ statistic, largest adjusted $R^2$ value, smallest AIC and smallest PRESS value is the model that includes all four predictor variables. We constructed a linear model (shown below), using the natural log to transform the count data. We decided to transform the count data to get the response variable to look more normally distributed so that it would follow the linear regression assumption that the response variable needs to be approximately normally distributed.
 
 ```{r, echo = F}
 olympic.lmfinal <- lm(log_count ~ log_pop + log_gdp_per_cap + host + comm_soviet, data = Olympic_v2)
@@ -176,8 +176,6 @@ $$\hat{Y} = -9.63058+0.44275X_1+0.40830X_2+0.86726X_3+1.03281X_4$$
 par(mfrow=c(2,2))
 plot(olympic.lmfinal)
 ```
-
-
 According to the Normal Q-Q plot (Figure X), it is reasonable to assume the residuals follow a normal distribution. Hoever, the Residuals vs Fitted plot indicates possible heteroskedasticity or non-constant variance of the errors. The Breusch-Pagan test will help us determine if heteroskedasticity is affecting the model.
 
 Assuming $Var(\epsilon_i)=\sigma^2_i$ such that $\text{log}_e\sigma_i^2=\gamma_0+\gamma_1X_i$:
@@ -203,6 +201,8 @@ library(nortest)
 lillie.test(olympic.lmfinal$residuals)
 ```
 The p-value$=0.2332>\alpha$, thus we fail to reject $H_0$. Therefore, it is reasonable to assume that the error terms are distributed normally.
+
+
 
 #### Influential Cases
 Appendix C summarizes the influential cases in our model. We can see from the list that high populous countries, such as the United States, China, and India are influential on our model. Additionally, many of the influential cases are identified as being host nations. We wanted to identify these influential cases for the sake of full analysis, but we are choosing to not delete them from the model because they are important data points. It would not be feasible to delete 37 points and high populous countries are important to the analysis.
