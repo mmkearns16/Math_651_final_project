@@ -25,7 +25,7 @@ Olympic = base.total[,c(2,3,4,5,6,7,8)]
 #Clean the data (Mary to add)
 
 #Make new dataframe with GDP / capita
-Olympic_v2 <- data.frame(year = Olympic$year, country = Olympic$country, count = Olympic$count, log_pop = log(Olympic$pop), log_gdp_pcap = log(Olympic$gdp/Olympic$pop), host = Olympic$host, comm_soviet = Olympic$comm_soviet)
+Olympic_v2 <- data.frame(year = Olympic$year, country = Olympic$country, count = Olympic$count, log_pop = log(Olympic$pop), log_gdp_per_cap = log(Olympic$gdp/Olympic$pop), host = Olympic$host, comm_soviet = Olympic$comm_soviet, log_count = log(Olympic$count))
 ```
 
 # Abstract 
@@ -165,21 +165,21 @@ allModelsResults <- lapply(allModelsList,
 ```{r, eval=FALSE, include=FALSE}
 #PRESS (Non-Mac)
 library(qpcR)
-olympic.lm = PRESS(lm(log(count)~log_pop+log_gdp_per_cap+host+comm_soviet))
-olympic.lmX1 = PRESS(lm(log(count)~log_pop))
-olympic.lmX2 = PRESS(lm(log(count)~log_gdp_per_cap))
-olympic.lmX3 = PRESS(lm(log(count)~host))
-olympic.lmX4 = PRESS(lm(log(count)~comm_soviet))
-olympic.lmX1X2 = PRESS(lm(log(count)~log_pop+log_gdp_per_cap))
-olympic.lmX1X3 = PRESS(lm(log(count)~log_gdp_per_cap+host))
-olympic.lmX1X4 = PRESS(lm(log(count)~log_pop+comm_soviet))
-olympic.lmX2X3 = PRESS(lm(log(count)~log_gdp_per_cap+host))
-olympic.lmX2X4 = PRESS(lm(log(count)~log_gdp_per_cap+comm_soviet))
-olympic.lmX3X4 = PRESS(lm(log(count)~host+comm_soviet))
-olympic.lmX1X2X3 = PRESS(lm(log(count)~log_pop+log_gdp_per_cap+host))
-olympic.lmX1X2X4 = PRESS(lm(log(count)~log_pop+log_gdp_per_cap+comm_soviet))
-olympic.lmX2X3X4 = PRESS(lm(log(count)~log_gdp_per_cap+host+comm_soviet))
-olympic.lmX1X3X4 = PRESS(lm(log(count)~log_pop+host+comm_soviet))
+olympic.lm = PRESS(lm(log_count~log_pop+log_gdp_per_cap+host+comm_soviet, data = Olympic_v2))
+olympic.lmX1 = PRESS(lm(log_count~log_pop, data = Olympic_v2))
+olympic.lmX2 = PRESS(lm(log_count~log_gdp_per_cap, data = Olympic_v2))
+olympic.lmX3 = PRESS(lm(log_count~host, data = Olympic_v2))
+olympic.lmX4 = PRESS(lm(log_count~comm_soviet, data = Olympic_v2))
+olympic.lmX1X2 = PRESS(lm(log_count~log_pop+log_gdp_per_cap, data = Olympic_v2))
+olympic.lmX1X3 = PRESS(lm(log_count~log_gdp_per_cap+host, data = Olympic_v2))
+olympic.lmX1X4 = PRESS(lm(log_count~log_pop+comm_soviet, data = Olympic_v2))
+olympic.lmX2X3 = PRESS(lm(log_count~log_gdp_per_cap+host, data = Olympic_v2))
+olympic.lmX2X4 = PRESS(lm(log_count~log_gdp_per_cap+comm_soviet, data = Olympic_v2))
+olympic.lmX3X4 = PRESS(lm(log_count~host+comm_soviet, data = Olympic_v2))
+olympic.lmX1X2X3 = PRESS(lm(log_count~log_pop+log_gdp_per_cap+host, data = Olympic_v2))
+olympic.lmX1X2X4 = PRESS(lm(log_count~log_pop+log_gdp_per_cap+comm_soviet, data = Olympic_v2))
+olympic.lmX2X3X4 = PRESS(lm(log_count~log_gdp_per_cap+host+comm_soviet, data = Olympic_v2))
+olympic.lmX1X3X4 = PRESS(lm(log_count~log_pop+host+comm_soviet, data = Olympic_v2))
 
 olympic.lm_press <- rbind(olympic.lmX1$stat,
                           olympic.lmX3$stat,
@@ -196,21 +196,66 @@ olympic.lm_press <- rbind(olympic.lmX1$stat,
                           olympic.lmX1X3X4$stat,
                           olympic.lmX2X3X4$stat,
                           olympic.lm$stat)
+
+#Summary
+Diagnostics = cbind(olympic.leapCP$which, Cp=round(olympic.leapCP$Cp,2), aR2=round(olympic.leapR2a$adjr2,2),
+      AIC=matrix(unlist(lapply(allModelsResults, function(x) round(extractAIC(x),2))), ncol=2, byrow=TRUE)[,2], PRESS = olympic.lm_press)
+#PRESS wasn't showing as column name
+colnames(Diagnostics) = c("1","2","3","4","Cp","aR2","AIC","PRESS")
+Diagnostics
 ```
 
+According to the selected model diagnostics, the model with the smallest $C_p$ statistic, largest adjusted $R^2$ value, smallest AIC and smallest PRESS value is the model that includes all four predictor variables.
+
+```{r}
+olympic.lmfinal <- lm(log_count ~ log_pop + log_gdp_per_cap + host + comm_soviet, data = Olympic_v2)
+summary(olympic.lmfinal)
+```
+
+$$X_1 = \text{log(population)}$$
+$$X_2 = \text{log(gdp/capita)}$$
+$$X_3 = \text{host}$$
+$$X_4 = \text{Soviet Country or Communist}$$
+$$\hat{Y} = -9.63058+0.44275X_1+0.40830X_2+0.86726X_3+1.03281X_4$$
+
+```{r, echo=FALSE}
+par(mfrow=c(2,2))
+plot(olympic.lmfinal)
+```
+
+ssumptions:
+According to the Normal Q-Q plot, it is reasonable to assume the residuals follow a normal distribution. Hoever, the Residuals vs Fitted plot indicates possible heteroskedasticity or non-constant variance of the errors. The Breusch-Pagan test will help us determine if heteroskedasticity is affecting the model.
+
+Breusch Pagan Test: Assuming $Var(\epsilon_i)=\sigma^2_i$ such that $\text{log}_e\sigma_i^2=\gamma_0+\gamma_1X_i$:
+Alternatives:
+$$H_0:\gamma_1,\text{vs. } H_a:\gamma_1\neq0$$
+Decision Rule: At significance level $\alpha = 0.05$, if the p-value of the Breusch-Pagan test is less than $\alpha$ then we reject $H_0$ and accept $H_a$, otherwise we fail to reject $H_0$. Accepting $H_a$ means we accept that the variance is non-constant.
+
+```{r, include=FALSE}
+library(lmtest)
+
+bptest(log_count ~ log_pop + log_gdp_per_cap + host + comm_soviet,data = Olympic_v2,studentize = FALSE)
+```
+The p-value $= 0.001587<\alpha$, therefore we accept the alternative hypothesis that our variance is not constant.
+
+Test for normality (Lilliefors Test):\
+Alternatives:
+$$H_0: \text{Sample comes from a N(}\mu,\sigma^2\text{) distribution}$$
+$$H_a: \text{Sample does not come from a N(}\mu,\sigma^2\text{) distribution}$$
+Decision Rule: At signifcance level $\alpha = 0.05$, if the p-value is less than $\alpha$ then we accept $H_a$ and reject $H_0$, otherwise we fail to reject $H_0$.
 
 ### Generalized Linear Model
 
 The first choice for a glm is typically a Poisson model, which may provide a reasonable model for these data. This generalized model was created with the same variables as the linear model; population, GDP per capita, the host dummy variable, and the communist/soviet dummy variable. Like the linear model, the population and GDP per capita were log-transformed, but in this model it is unnecessary to transform the medal count. The full poisson model showed highly significant parameters, but the dispersion of this model was much greater than 1 (disp. = 6.621), so a negative binomial model would likely provide a better fit for these data. 
 
 ```{r, comment = NA, include=F}
-Olympic.pois<-glm(count~log_pop + log_gdp_pcap + host + comm_soviet, data = Olympic_v2, family = poisson)
+Olympic.pois<-glm(count~log_pop + log_gdp_per_cap + host + comm_soviet, data = Olympic_v2, family = poisson)
 P__disp(Olympic.pois)
 ```
 
 ```{r negative binomial, echo = F}
 library(MASS)
-olympic.nb <- glm.nb(count~log_pop + log_gdp_pcap + host + comm_soviet, data = Olympic_v2)
+olympic.nb <- glm.nb(count~log_pop + log_gdp_per_cap + host + comm_soviet, data = Olympic_v2)
 ```
 
 ```{r nb leaps, echo = F}
