@@ -34,11 +34,11 @@ Olympic_v2 <- data.frame(year = Olympic$year, country = Olympic$country, count =
 
 ##### needs editing 
 
-Every four summers, the Olympic Games become the center of the world’s attention, as elite athletes seek honor for both themselves and for their countries. Many countries associate tremendous national pride with their medal counts, since a nation’s athletic competence also projects its soft power. For this last reason, some governments invest generously in their sports programs, in hopes of an elevated medal count in the next Olympics.
+Every four summers, the Olympic Games become the center of the world’s attention, as elite athletes seek honor for both themselves and for their countries. Many countries associate tremendous national pride with their medal counts, since a nation’s athletic competence also projects its soft power. 
 
 Given the fierce competition and high profile nature of medal counts, one may wonder what factors influence the number of medals that a country wins at the summer Olympics. Certainly countries with the largest economies and populations, such as the United States and China, commonly dominate the top of the billboard. However, Azerbaijan, which ranks 91st in population and 72nd in total GDP, also ranked in the top 20 countries by total medal count in the 2016 Summer Olympics. 
 
-Our team will develop multiple regression models using various predictors, such as GDP, population size, size of athletic investment, and geographic location, to predict medal count. We will build the model on countries’ total medal count for the 2004, 2008, and 2012 Olympics, and then project the model onto the 2016 Olympics to understand the accuracy of the model’s predictions. 
+Our team will develop multiple regression models using predictors like GDP per Capita, Population, whether a country is a host country, and whether a country is a former soviet or communist state. We will use these factors to predict medal count, and examine how these each of these factors influences medal count. We will build the model on countries’ total medal count for the 1996, 2004, 2008, and 2012 Olympics, and then project the model onto the 2016 Olympics to understand the accuracy of the model’s predictions. 
 
 # Methods and Materials
 
@@ -194,7 +194,7 @@ The p-value $= 0.001587<\alpha$, therefore we accept the alternative hypothesis 
 
 $$H_0: \text{Sample comes from a N(}\mu,\sigma^2\text{) distribution}$$
 $$H_a: \text{Sample does not come from a N(}\mu,\sigma^2\text{) distribution}$$
-Decision Rule: At signifcance level $\alpha = 0.05$, if the p-value is less than $\alpha$ then we accept $H_a$ and reject $H_0$, otherwise we fail to reject $H_0$.
+At signifcance level $\alpha = 0.05$, if the p-value is less than $\alpha$ then we accept $H_a$ and reject $H_0$, otherwise we fail to reject $H_0$.
 
 ```{r, include=FALSE}
 library(nortest)
@@ -405,7 +405,7 @@ colnames(df_133)<-c(
 'Robust (Bisquare)',
 'Poisson',
 'Neg Binom',
-'Neg Binom (fixed effects)')
+'Neg Binom (fixed effects')
 rownames(df_133)<-c('Intercept','log(GDP/Cap)','log(Pop)','Host','Soviet/Comm')
 
 kable(df_133, caption = 'Coefficient Comparison')
