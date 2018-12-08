@@ -204,20 +204,11 @@ lillie.test(olympic.lmfinal$residuals)
 ```
 The p-value$=0.2332>\alpha$, thus we fail to reject $H_0$. Therefore, it is reasonable to assume that the error terms are distributed normally.
 
-```{r, echo = F, include = F}
-#Influential cases
-olympic.lm_inf=influence.measures(olympic.lmfinal)$is.inf
-idx=which(apply(olympic.lm_inf,1,any))
-
-Olympic[idx,]
-```
+#### Influential Cases
+Appendix C summarizes the influential cases in our model. We can see from the list that high populous countries, such as the United States, China, and India are influential on our model. Additionally, many of the influential cases are identified as being host nations. We wanted to identify these influential cases for the sake of full analysis, but we are choosing to not delete them from the model because they are important data points. It would not be feasible to delete 37 points and high populous countries are important to the analysis.
 
 
-APPENDIX:
-A. Influential Cases by test:
-```{r, echo = F, include = F}
-olympic.lm_inf[idx,]
-```
+
 
 
 ### Generalized Linear Model
@@ -425,7 +416,16 @@ kable(df_133, caption = 'Coefficient Comparison')
 # Appendix B
 ```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
 ```
-
+# Appendix C: Influential Cases
+```{r, echo = F, include = F}
+#Influential cases
+olympic.lm_inf=influence.measures(olympic.lmfinal)$is.inf
+idx=which(apply(olympic.lm_inf,1,any))
+#Influential Cases
+Olympic[idx,]
+#Inluential Cases by Test
+olympic.lm_inf[idx,]
+```
 
 
 
