@@ -48,9 +48,9 @@ The purpose of this reasearch is to determine whether there is a predictive rela
 
 ### EDA--choose what we want to keep, and then format as figures in Appendix
 
-As we can see IN FIGURE..., the average number of medals won by a country in a year is 11.79 medals and the minimum number of medals is one. This is meaningful because this means we are only assessing countries that have won at least one medal in at least one of the years we are analyzing.
+As we can see IN table 1, the average number of medals won by a country in a year is 11.79 medals and the minimum number of medals is 1. This is meaningful because this means we are only assessing countries that have won at least one medal in at least one of the years we are analyzing.
 
-Below we see that the medal count is distributed exponentially, which could indicate a need to transform the response variable if we need to fit a linear regression model.
+We can also see in Figure 1 that the medal count is distributed exponentially, which could indicate a need to transform the response variable if we need to fit a linear regression model.
 
 $X_1$: This variable indicates population of people in the country in the associated year. Below, we can see a histogram of the population data. On the left, is the original distribution of the data points and on the right, we've transformed the data to look more normally distributed.
 
@@ -70,42 +70,42 @@ The scatterplot matrix does not obviously show us many relationships between the
 
 This correlation matrix suggests that collinearity between variables will not be a significant issue. The most significant correlation between predictor variables is between the log of the GDP per capita and the indicator of Communism or Soviet Union inclusion variable. However, the correlation coefficient is only -0.2989.
 
-Summary of Medal Count:
+
 ```{r, include = F, echo=FALSE}
 library(knitr)
 summary(base$count)
 ```
-Distribution of Medal Count:
+
 
 ```{r medal_count_hist, include = F, echo=FALSE}
 hist(base$count)
 ```
 
-Distribution of Medal Count in 2008:
+
 
 ```{r count_2008_hist, echo=FALSE, include = F}
 hist(base[which(base$year == c("2008")),c("count")])
 ```
 
-GDP Summary:
+
 ```{r, echo=FALSE, include = F}
 summary(base$gdp)
 ```
-Population Summary:
+
 ```{r, echo=FALSE, include = F}
 summary(base$pop)
 ```
-Total Count of Communist / comm_soviet Countries:
+
 ```{r, echo=FALSE, include = F}
 sum(base$comm_soviet)
 nrow(base)-sum(base$comm_soviet)
 ```
-Count of host, hosted within 8 years prior, or will be hosting within 8 years:
+
 ```{r, echo=FALSE, include = F}
 sum(base$host)
 ```
 
-Histograms of Population:
+
 ```{r pop_hists, echo=FALSE, include = F}
 par(mfrow=c(1,2))
 #Histogram Population
@@ -114,24 +114,24 @@ hist(base$pop,main = "Untransformed",xlab = "Population")
 hist(log(base$pop),main = "Transformed",xlab = "log(Population)")
 ```
 
-Boxplot of $\text{log}(\text{GDP})$:
+
 ```{r log_gdp_box, echo=FALSE, include = F}
 #Log(GDP)
 boxplot(log(base$gdp),ylab = "log(GDP)")
 ```
 
-Boxplot of $\text{log}(\text{Population})$:
+
 ```{r log_pop_box, echo=FALSE, include = F}
 #log(Population)
 boxplot(log(base$pop),ylab = "log(Population)")
 ```
 
-Scatterplot Matrix of Variables:
+
 ```{r scatter_mat, echo=FALSE, include = F}
 pairs(Olympic[,c(2,4,5,6,7)])
 ```
 
-Correlation Matrix of Predictor Variables and Response Variable:
+
 ```{r corr_mat, include = F, echo=FALSE}
 kable(cor(Olympic[,c(2,4,5,6,7)]))
 ```
@@ -207,7 +207,7 @@ Diagnostics
 
 According to the selected model diagnostics, the model with the smallest $C_p$ statistic, largest adjusted $R^2$ value, smallest AIC and smallest PRESS value is the model that includes all four predictor variables.
 
-```{r}
+```{r, echo = F, include = F}
 olympic.lmfinal <- lm(log_count ~ log_pop + log_gdp_per_cap + host + comm_soviet, data = Olympic_v2)
 summary(olympic.lmfinal)
 ```
@@ -218,7 +218,7 @@ $$X_3 = \text{host}$$
 $$X_4 = \text{Soviet Country or Communist}$$
 $$\hat{Y} = -9.63058+0.44275X_1+0.40830X_2+0.86726X_3+1.03281X_4$$
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, include = F}
 par(mfrow=c(2,2))
 plot(olympic.lmfinal)
 ```
@@ -247,16 +247,12 @@ Decision Rule: At signifcance level $\alpha = 0.05$, if the p-value is less than
 ```{r, include=FALSE}
 library(nortest)
 ```
-```{r}
+```{r, include = F}
 lillie.test(olympic.lmfinal$residuals)
 ```
 The p-value$=0.2332>\alpha$, thus we fail to reject $H_0$. Therefore, it is reasonable to assume that the error terms are distributed normally.
 
-#Diagnostics
-vif(olympic.lmfinal)
-
-Influential Cases:
-```{r}
+```{r, echo = F, include = F}
 #Influential cases
 olympic.lm_inf=influence.measures(olympic.lmfinal)$is.inf
 idx=which(apply(olympic.lm_inf,1,any))
@@ -267,7 +263,7 @@ Olympic[idx,]
 
 APPENDIX:
 A. Influential Cases by test:
-```{r}
+```{r, echo = F, include = F}
 olympic.lm_inf[idx,]
 ```
 
@@ -327,9 +323,18 @@ library(knitr)
 
 \newpage
 # Appendix A
+```{r, echo = F}
+df_1<-data.frame(matrix(summary(Olympic_v2$count), ncol = 6))
+colnames(df_1)<-c('Min.', '1st Qu.','Median',    'Mean', '3rd Qu.',    'Max')
+kable(df_1, caption = 'Summary of Count Variable')
+```
 
 ```{r, echo = F}
 kable(cbind(which, Parameters = olympic.nb_leap$size, Cp.nb, AIC.nb), caption = 'Model Selection Diagnostics for a Negative Binomial Model', format.args = list(justify = 'centre'))
+```
+
+```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Distribution of Count', fig.height=3}
+plot(density(Olympic_v2$count), lwd = 4, xlab = '', main = '')
 ```
 
 ```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='This is a test figure.'}
