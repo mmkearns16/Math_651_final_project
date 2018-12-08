@@ -276,6 +276,13 @@ library(knitr)
 ```
 
 # Results 
+2016 Out-of-sample Projection:
+
+As part of the data collection process, information for the year 2016 was also researched, but left out of the original analysis. Therefore, because the data was not part of the training set, we can use it as a testing set. The medal count data for 2016 is similarly distributed to the overal training data, so testing on it is a feasible plan.
+
+To determine the accuracy of each of our models we determined 95% prediction intervals for each of the 81 points in the 2016 medal count data. Then we calculated the ratio of data points that had their actual counts within their respective prediction intervals to total number of data points. For our estimated linear regression function, 
+$$\hat{Y} = -9.63058+0.44275X_1+0.40830X_2+0.86726X_3+1.03281X_4$$
+74 out of 81 points had medal counts within their respective 95% prediction intervals. 
 
 # Discussion and Conclusions
 
