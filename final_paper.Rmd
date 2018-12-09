@@ -40,9 +40,9 @@ Our team will develop multiple regression models using predictors like GDP per C
 ## Data 
 
 ### Dependent Variable
-We model on the total number of medal counts, by participating country and year during which a Summer Olympics occurred. The dependent variable data come from a website called $www.medalspercapita.com$. For any given Summer Olymipcs, this website only lists the 80 - 90 countries that have won at least one medal, out of the 200 or so nations that participate in each summer Olympics. 
+We model on the total number of medal counts, by participating country and year during which a Summer Olympics occurred. The dependent variable data come from a website called $www.medalspercapita.com$. For any given Summer Olympics, this website only lists the 80 - 90 countries that have won at least one medal, out of the 200 or so nations that participate in each summer Olympics. 
 
-Table 1 and Figure 1 both illustrate that the medal counts exhibit right-skewed distribution. Among countries that have won at least one medal, the median medal count is 5, while the mean medal count is 12. The skewed distribution suggests the need for a log transformation, which can also ensure that the predictions are positive numbers. Moreover, given we are modeling on count data, where large counts rarely occur, a Poisson model may be more appropriate than linear regression.
+Table 1 and Figure 1 both illustrate that the medal counts exhibit right-skewed distribution. Among countries that have won at least one medal, the median medal count is 5, while the mean medal count is 12. The skewed distribution suggests the need for a log transformation (in the case of a linear model), which can also ensure that the predictions are positive numbers. Moreover, given we are modeling on count data, where large counts rarely occur, a Poisson model may be more appropriate than linear regression.
 
 ### Predictor Variables
 Based on existing literature (Bernard and Busse 2006, Goldman Sachs 2016, Bian 2005), potentially significant predictors of medal count include size of population, GDP per capita, whether or not a country has hosted or will host a summer Olymipcs, and whether or not a country is or was a command economy.
@@ -59,7 +59,7 @@ We generate a correlation matrix (Table 2) and paired scatterplot (Figure 3) to 
 
 The scatter plot matrix in Figure 3 shows positive correlation between count of medals and population size. We do not observe strong linear relationship between medal count and GDP per capita, whether or not a country has hosted or will host, and whether a country used to be part of a Command Economy. The correlation matrix corroborates the finding that population size has the strongest linear correlation with medal count (correlation = 0.48), and Command Economy (Y/N) has the weakest linear correlation (correlation = 0.09).
 
-This correlation matrix in Table 3 also suggests that collinearity between variables will not be a significant issue. The most significant correlation between predictor variables is between the log of the GDP per capita and the indicator of Communism or Soviet Union inclusion variable. However, the correlation coefficient is only -0.2989. This suggests that multicollinearity should not be much of an issue.
+This correlation matrix in Table 3 also suggests that collinearity between variables will not be a significant problem. The most significant correlation between predictor variables is between the log of the GDP per capita and the indicator of Communism or Soviet Union inclusion variable. However, the correlation coefficient is only -0.2989. This suggests that multicollinearity should not be much of an issue.
 
 
 ```{r, include = F, echo=FALSE}
@@ -128,7 +128,7 @@ kable(cor(Olympic[,c(2,4,5,6,7)]))
 
 ## Model Building and Selection
 
-We consider two types of models: a linear model and a Poisson model, given the count nature of the data.
+We will consider two types of models: a linear model and a Poisson model, given the count nature of the data.
 
 ### Linear Model
 
@@ -270,10 +270,11 @@ library(knitr)
 
 # Results 
 
-##Comparison of Models
+## Comparison of Models
+
 Table 6 compares the coefficients across different model specifications. We observe the following: 
 
-- Compared to the OLS linear model, the robust linear model produces slightly larger standard errors, but similar coefficient magnitudes. This finding suggests that outliers does not substantially influence the OLS linear model fit.
+- Compared to the OLS linear model, the robust linear model produces slightly larger standard errors, but similar coefficient magnitudes. This finding suggests that outliers do not substantially influence the OLS linear model fit.
 
 - As expected from the dependent variable's over-dispersion, the Poisson regression underestimates the standard error, compared to the other 4 model specifications.
 
@@ -283,7 +284,7 @@ Figure 5 compares the Actual medal count values vs. the values fit by the OLS li
 
 Interestingly, table 6 shows that the OLS linear regression has better model fit, because it has lower AIC and MSE.
 
-##2016 Out-of-sample Projection:
+## 2016 Out-of-sample Projection:
 
 As part of the data collection process, information for the year 2016 was also researched, but left out of the original analysis. Therefore, because the data was not part of the training set, we can use it as a testing set. The medal count data for 2016 is similarly distributed to the overal training data, so testing on it is a feasible plan.
 
