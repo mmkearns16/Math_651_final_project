@@ -385,8 +385,8 @@ kable(cbind(which, Parameters = olympic.nb_leap$size, Cp.nb, AIC.nb), caption = 
 \newpage
 
 ```{r AIC_comp, echo = F}
-df_20<-data.frame(matrix(c(2008.82, 0.751, 2319.23,  0.8220021), nrow = 2, byrow = T))
-colnames(df_20)<-c('AIC', 'MSE')
+df_20<-data.frame(matrix(c(2008.82, 0.751, 'TBD', 2319.23,  0.822, 'TBD'), nrow = 2, byrow = T))
+colnames(df_20)<-c('AIC', 'MSE', 'MSE (out of sample)')
 rownames(df_20)<-c('Linear', 'Negative Binomial')
 kable(df_20, caption = 'Linear vs GLM Model Comparison')
 ```
