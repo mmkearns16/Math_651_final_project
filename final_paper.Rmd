@@ -39,27 +39,27 @@ Our team will develop multiple regression models using predictors like GDP per C
 
 ## Data 
 
-The purpose of this research is to determine whether there is a predictive relationship between population, GDP per capita, being a host nation, or at one point being a Communist nation or a member of the Soviet Union and number of medals won at the Olympics in the associated year by country.
+### Dependent Variable
+We model on the total number of medal counts, by participating country and year during which a Summer Olympics occurred. The dependent variable data come from a website called $www.medalspercapita.com$. For any given Summer Olymipcs, this website only lists the 80 - 90 countries that have won at least one medal, out of the 200 or so nations that participate in each summer Olympics. 
 
-### EDA
+Table 1 and Figure 1 both illustrate that the medal counts exhibit right-skewed distribution. Among countries that have won at least one medal, the median medal count is 5, while the mean medal count is 12. The skewed distribution suggests the need for a log transformation, which can also ensure that the predictions are positive numbers. Moreover, given we are modeling on count data, where large counts rarely occur, a Poisson model may be more appropriate than linear regression.
 
-As we can see in table 1, the average number of medals won by a country in a year is 11.79 medals and the minimum number of medals is 1. This is meaningful because this shows that we are only assessing countries that have won at least one medal in at least one of the years we are analyzing.
+### Predictor Variables
+Based on existing literature (Bernard and Busse 2006, Goldman Sachs 2016, Bian 2005), potentially significant predictors of medal count include size of population, GDP per capita, whether or not a country has hosted or will host a summer Olymipcs, and whether or not a country is or was a command economy.
 
-We can also see in Figure 1 that the medal count is distributed exponentially, which could indicate a need to transform the response variable if we need to fit a linear regression model.
+$X_1: Population$: This variable indicates population of people in the country in the associated year. Figure 2 shows a histogram of the population data. The left chart illustrates the right-skewed distribution of the original data (with China and India representing the far right). The right chart shows that applying a natural log transformation reduces the skewness and the influence of extreme X variable values on the model. 
 
-$X_1$: This variable indicates population of people in the country in the associated year. In figure 2, we can see a histogram of the population data. On the left, is the original distribution of the data points and on the right, we've transformed the data to look more normally distributed This should allow for a cleaner regression model, although interpretation of parameters may be slightly more difficult.
+$X_2: GDP/Capita$: This variable indicates GDP per capita in the associated year. These data show a similar distribution to the population variable, so we also applied the natural log transformation.
 
-$X_2$: This variable indicates GDP per capita in the associated year. These data show a similar distribution to the population variable, so we again decided to transform this variable, for the same reasons.
+$X_3: Host (1/0)$: This is a binary predictor variable with value equal to 1 if a country has hosted a summer Olympics in the 8 years prior to the Olympics in consideration, or will host in the next 8 years. For example, Greece, which hosted the 2004 Olympics, will have value = 1 for the 1996, 2000, 2004, 2008, and 2012 Olympics. 25 observations are classified as a host by this measure. 
 
-$X_3$: This is a binary predictor variable that indicates with a 1 if a country has or will host the Olympics within the 16 years surrounding the Olympics in question. Of all the data points, 25 are classified as a host by this measure, which is consistent with the definition of the variable, and the number of years in the data set. 
+$X_4: Command Economy  (1/0)$: This binary predictor variable indicates whether the country was once a member of the Soviet Union or Yugoslavia, or ruled by a Communist party. We assembled a list of formerly or currently Soviet, Yugoslavian, or Communist countries using $www.worldatlast.com$, $Wikepedia$'s list of communist parties, and $www.sporcle.com$. 111 data points are classified as former Soviet Union or Communist.
 
-$X_4$: This binary predictor variable indicates whether the country was once a member of the Soviet Union or if they were indicated as ever being a Communist country. From __________ we aggregated a binary predictor variable that identifies countries that were once members of the Soviet Union or at one time classified as communist countries. 111 data points are classified as former Soviet Union or Communist.(INSERT SOURCE AGAIN???)
+We generate a correlation matrix (Table 2) and paired scatterplot (Figure 3) to illustrate the relationships between the variables, especially any multicollinearity. 
 
-To properly determine an ideal model for the data, we need to address the relationships between variables. We can do this be analyzing both the scatter plot matrix of variables and the correlation matrix.
+The scatter plot matrix in Figure 3 shows positive correlation between count of medals and population size. We do not observe strong linear relationship between medal count and GDP per capita, whether or not a country has hosted or will host, and whether a country used to be part of a Command Economy. The correlation matrix corroborates the finding that population size has the strongest linear correlation with medal count (correlation = 0.48), and Command Economy (Y/N) has the weakest linear correlation (correlation = 0.09).
 
-The scatter plot matrix in Figure 3 does not obviously show us many strong relationships between the predictor variables and their effect on the response variable. While there might be a relationship between the log of the population and the medal count, it is difficult to determine from the plot if this is a linear relationship. Additional information can be collected from the correlation matrix below.
-
-This correlation matrix in Table 3 suggests that collinearity between variables will not be a significant issue. The most significant correlation between predictor variables is between the log of the GDP per capita and the indicator of Communism or Soviet Union inclusion variable. However, the correlation coefficient is only -0.2989. This suggests that multicollinearity should not be much of an issue.
+This correlation matrix in Table 3 also suggests that collinearity between variables will not be a significant issue. The most significant correlation between predictor variables is between the log of the GDP per capita and the indicator of Communism or Soviet Union inclusion variable. However, the correlation coefficient is only -0.2989. This suggests that multicollinearity should not be much of an issue.
 
 
 ```{r, include = F, echo=FALSE}
@@ -71,7 +71,6 @@ summary(base$count)
 ```{r medal_count_hist, include = F, echo=FALSE}
 hist(base$count)
 ```
-
 
 
 ```{r count_2008_hist, echo=FALSE, include = F}
@@ -129,6 +128,8 @@ kable(cor(Olympic[,c(2,4,5,6,7)]))
 
 ## Model Building and Selection
 
+We consider two types of models: a linear model and a Poisson model, given the count nature of the data.
+
 ### Linear Model
 
 ```{r, include=FALSE}
@@ -176,13 +177,13 @@ According to the Normal Q-Q plot (Figure X), it is reasonable to assume the resi
 Assuming $Var(\epsilon_i)=\sigma^2_i$ such that $\text{log}_e\sigma_i^2=\gamma_0+\gamma_1X_i$:
 
 $$H_0:\gamma_1,\text{vs. } H_a:\gamma_1\neq0$$
-At significance level $\alpha = 0.05$, if the p-value of the Breusch-Pagan test is less than $\alpha$ then we reject $H_0$ and accept $H_a$, otherwise we fail to reject $H_0$. Accepting $H_a$ means we accept that the variance is non-constant.
+At significance level $\alpha = 0.05$, if the p-value of the Breusch-Pagan test is less than $\alpha$ then we reject $H_0$ and conclude $H_a$, otherwise we fail to reject $H_0$. Rejecting $H_0$ in favor of $H_a$ means that we conclude that the variance is non-constant.
 
 ```{r, include=FALSE}
 library(lmtest)
 bptest(log_count ~ log_pop + log_gdp_per_cap + host + comm_soviet,data = Olympic_v2,studentize = FALSE)
 ```
-The p-value $= 0.001587<\alpha$, therefore we accept the alternative hypothesis that our variance is not constant.
+The p-value $= 0.001587<\alpha$, therefore we conclude that our variance is not constant.
 
 $$H_0: \text{Sample comes from a N(}\mu,\sigma^2\text{) distribution}$$
 $$H_a: \text{Sample does not come from a N(}\mu,\sigma^2\text{) distribution}$$
@@ -268,7 +269,21 @@ library(knitr)
 ```
 
 # Results 
-2016 Out-of-sample Projection:
+
+##Comparison of Models
+Table 6 compares the coefficients across different model specifications. We observe the following: 
+
+- Compared to the OLS linear model, the robust linear model produces slightly larger standard errors, but similar coefficient magnitudes. This finding suggests that outliers does not substantially influence the OLS linear model fit.
+
+- As expected from the dependent variable's over-dispersion, the Poisson regression underestimates the standard error, compared to the other 4 model specifications.
+
+- Negative binomial produces similar coefficient and standard error estimates as OLS and robust linear regressions.
+
+Figure 5 compares the Actual medal count values vs. the values fit by the OLS linear regression and negative binomial regressions. The blue dots plot the predicted vs. actual values for all observations. The red line indicates perfect fit. We observe that the negative binomial regression appears to have better fit of the data.
+
+Interestingly, table 6 shows that the OLS linear regression has better model fit, because it has lower AIC and MSE.
+
+##2016 Out-of-sample Projection:
 
 As part of the data collection process, information for the year 2016 was also researched, but left out of the original analysis. Therefore, because the data was not part of the training set, we can use it as a testing set. The medal count data for 2016 is similarly distributed to the overal training data, so testing on it is a feasible plan.
 
@@ -290,7 +305,7 @@ kable(df_1, caption = 'Summary of Count Variable')
 ```
 
 ```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Distribution of Count', fig.height=3}
-plot(density(Olympic_v2$count), lwd = 4, xlab = '', main = '')
+hist(Olympic_v2$count, lwd = 4, xlab = '', main = '')
 ```
 
 ```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Histogram of the Population Variables'}
