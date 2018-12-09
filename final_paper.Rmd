@@ -2,14 +2,14 @@
 title: "Math 651 Final Project"
 author: "Mary Peng, Hillary Dunn, and Max Kearns"
 date: "December 17, 2018"
-output: 
+output:
   pdf_document:
-    number_sections: true
+    number_sections: yes
 ---
 
 ```{r setup, include=FALSE, cache = T}
 knitr::opts_chunk$set(echo = FALSE, comment = NA)
-base<-read.csv('data/base_data.csv', stringsAsFactors = F)
+base <-read.csv('data/base_data.csv', stringsAsFactors = F)
 P__disp <- function(x) {
   pr <- sum(residuals(x, type="pearson")^2)
   dispersion <- pr/x$df.residual
@@ -18,12 +18,9 @@ P__disp <- function(x) {
 library(dplyr)
 library(qpcR)
 library(MuMIn)
-
 base.total = base[which(base$year!=2016),]
 Olympic = base.total[,c(2,3,4,5,6,7,8)]
-
 #Clean the data (Mary to add)
-
 #Make new dataframe with GDP / capita
 Olympic_v2 <- data.frame(year = Olympic$year, country = Olympic$country, count = Olympic$count, log_pop = log(Olympic$pop), log_gdp_per_cap = log(Olympic$gdp/Olympic$pop), host = Olympic$host, comm_soviet = Olympic$comm_soviet, log_count = log(Olympic$count))
 ```
@@ -140,7 +137,6 @@ library(leaps)
 olympic.leapCP <- leaps(y=log(Olympic_v2$count), x=Olympic_v2[,4:7])
 #R2a
 olympic.leapR2a <- leaps(y=log(Olympic_v2$count), x=Olympic_v2[,4:7], method = 'adjr2')
-
   ### Code for AIC
 xList <- names(Olympic_v2)[4:7]
   #### Remove the last row that has all False's
@@ -153,11 +149,10 @@ allModelsList <- apply(vec, 1, function(x) as.formula(
   ### Calculate the coefficients for all 16 models
 allModelsResults.lm <- lapply(allModelsList, 
                            function(x) lm(x, data=Olympic_v2))
-
 ```
 
 
-According to the selected model diagnostics shown in Table 3, the model with the smallest $C_p$ statistic, largest adjusted $R^2$ value, smallest AIC and smallest PRESS value is the model that includes all four predictor variables. We constructed a linear model (shown below), using the natural log to transform the count data.
+According to the selected model diagnostics shown in Table 3, the model with the smallest $C_p$ statistic, largest adjusted $R^2$ value, smallest AIC and smallest PRESS value is the model that includes all four predictor variables. We constructed a linear model (shown below), using the natural log to transform the count data. We decided to transform the count data to get the response variable to look more normally distributed so that it would follow the linear regression assumption that the response variable needs to be approximately normally distributed.
 
 ```{r, echo = F}
 olympic.lmfinal <- lm(log_count ~ log_pop + log_gdp_per_cap + host + comm_soviet, data = Olympic_v2)
@@ -175,8 +170,8 @@ par(mfrow=c(2,2))
 plot(olympic.lmfinal)
 ```
 
+According to the Normal Q-Q plot (Figure X), it is reasonable to assume the residuals follow a normal distribution. Hoever, the Residuals vs Fitted plot indicates possible heteroskedasticity or non-constant variance of the errors. The Breusch-Pagan test will help us determine if heteroskedasticity is affecting the model.
 
-According to the Normal Q-Q plot (Figure X), it is reasonable to assume the residuals follow a normal distribution. Soever, the Residuals vs Fitted plot indicates possible heteroskedasticity or non-constant variance of the errors. The Breusch-Pagan test will help us determine if heteroskedasticity is affecting the model.
 
 Assuming $Var(\epsilon_i)=\sigma^2_i$ such that $\text{log}_e\sigma_i^2=\gamma_0+\gamma_1X_i$:
 
@@ -185,7 +180,6 @@ At significance level $\alpha = 0.05$, if the p-value of the Breusch-Pagan test 
 
 ```{r, include=FALSE}
 library(lmtest)
-
 bptest(log_count ~ log_pop + log_gdp_per_cap + host + comm_soviet,data = Olympic_v2,studentize = FALSE)
 ```
 The p-value $= 0.001587<\alpha$, therefore we accept the alternative hypothesis that our variance is not constant.
@@ -202,16 +196,13 @@ lillie.test(olympic.lmfinal$residuals)
 ```
 The p-value$=0.2332>\alpha$, thus we fail to reject $H_0$. Therefore, it is reasonable to assume that the error terms are distributed normally.
 
-```{r, echo = F, include = F}
-#Influential cases
-olympic.lm_inf=influence.measures(olympic.lmfinal)$is.inf
-idx=which(apply(olympic.lm_inf,1,any))
-
-Olympic[idx,]
-```
+We attempt to correct for non-constant variance and outliers by using robust linear regression, with Huber and Bisquare weights. As shown in table 6, the coefficients generated through robust linear regression, using Bisquare weights, fall within +/- 5% of the corresponding OLS regressions. The robust regression’s standard errors are slightly larger than those of the OLS regression. We find similar results when using Huber weights. Re-running the Breusch-Pagan test results in a p-value of 0.002, which means we would still reject the null hypothesis of homoskedasticity at $\alpha$ = 0.05 level, and conclude that the robust regression still exhibits non-constant variance.
 
 
-```{r, echo = F, include = F}
+#### Influential Cases
+Appendix C summarizes the influential cases in our model. We can see from the list that high populous countries, such as the United States, China, and India are influential on our model. Additionally, many of the influential cases are identified as being host nations. We wanted to identify these influential cases for the sake of full analysis, but we are choosing to not delete them from the model because they are important data points. It would not be feasible to delete 37 points and high populous countries are important to the analysis.
+
+```{r, eval = F, echo = F, include = F}
 olympic.lm_inf[idx,]
 ```
 
@@ -240,7 +231,6 @@ olympic.nb <- glm.nb(count~log_pop + log_gdp_per_cap + host + comm_soviet, data 
 library(leaps)
 olympic.nb_leap <- leaps(y=Olympic_v2$count, x=Olympic_v2[,4:7])
 Cp.nb<-round(olympic.nb_leap$Cp, 2)
-
 which<-olympic.nb_leap$which
 rownames(which) <-NULL
 colnames(which)<-c('Pop', 'GDP/C', 'Host', 'Soviet')
@@ -251,27 +241,40 @@ A negative binomial regression model assumes that dispersion is greater than 1, 
 $$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = \beta_0+\beta_1X_1+\beta_2X_2+\beta_3X_3+\beta_4X_4$$
 $$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = -10.16577+0.49848X_1+0.40239X_2+0.69267X_3+1.03376X_4$$
 
+Independence among observations constitutes a key assumption for the Poisson and negative binomial regressions. Since our model uses panel data, observations over time for the same country will exhibit serial autocorrelation, thereby violating the independence assumption. Moreover, the medal counts among countries within a given year are not completely independent, because of the fixed total number of medals awarded in a single Olympic year.
+
+To address the above non-independence, we tried adding year and country fixed effects to the negative binomial regression. The models take the form: 
+
+$$\text{ln}(Y_it) = \beta_0+\beta_1X_1it+\beta_2X_2it+\beta_3X_3it+\beta_4X_4it+d_t$$
+
+$$\text{ln}(Y_it) = \beta_0+\beta_1X_1it+\beta_2X_2it+\beta_3X_3it+\beta_4X_4it+v_i$$
+
+where $d_i$ and $v_i$ represent dummies for year $t$ and country $i$, respectively. The year fixed effect accounts for changing number of sports and number of country participants. The country fixed effect accounts for unobservable factors that vary little over time, such as a country’s investment in national sports teams, cultural attitude toward the Olympics, etc.
+
+
 ```{r weird algorithm thing, echo = F}
 xList <- names(Olympic_v2)[4:7]
 vec <- olympic.nb_leap$which
-
 #Name the columns in the grid
 names(vec) <- paste("X", 1:4, sep="")
-
 #Build matrix of formula for every row
 allModelsList <- apply(vec, 1, function(x) as.formula(
   paste(c("count ~ 1", xList[x]), collapse = "+")))
-
 #Calculate the coefficients for all 16 models
 allModelsResults <- lapply(allModelsList, 
                            function(x) glm.nb(x, data=Olympic_v2))
-
-
 AIC.nb<-matrix(unlist(lapply(allModelsResults, function(x) round(extractAIC(x),2))), ncol = 2, byrow = T)[,2]
 library(knitr)
 ```
 
 # Results 
+2016 Out-of-sample Projection:
+
+As part of the data collection process, information for the year 2016 was also researched, but left out of the original analysis. Therefore, because the data was not part of the training set, we can use it as a testing set. The medal count data for 2016 is similarly distributed to the overal training data, so testing on it is a feasible plan.
+
+To determine the accuracy of each of our models we determined 95% prediction intervals for each of the 81 points in the 2016 medal count data. Then we calculated the ratio of data points that had their actual counts within their respective prediction intervals to total number of data points. For our estimated linear regression function, 
+$$\hat{Y} = -9.63058+0.44275X_1+0.40830X_2+0.86726X_3+1.03281X_4$$
+74 out of 81 points had medal counts within their respective 95% prediction intervals. 
 
 # Discussion and Conclusions
 
@@ -324,7 +327,6 @@ olympic.lmX1X2X3 = PRESS(lm(log_count~log_pop+log_gdp_per_cap+host, data = Olymp
 olympic.lmX1X2X4 = PRESS(lm(log_count~log_pop+log_gdp_per_cap+comm_soviet, data = Olympic_v2))
 olympic.lmX2X3X4 = PRESS(lm(log_count~log_gdp_per_cap+host+comm_soviet, data = Olympic_v2))
 olympic.lmX1X3X4 = PRESS(lm(log_count~log_pop+host+comm_soviet, data = Olympic_v2))
-
 olympic.lm_press <- rbind(olympic.lmX1$stat,
                           olympic.lmX3$stat,
                           olympic.lmX2$stat,
@@ -340,7 +342,6 @@ olympic.lm_press <- rbind(olympic.lmX1$stat,
                           olympic.lmX1X3X4$stat,
                           olympic.lmX2X3X4$stat,
                           olympic.lm$stat)
-
 #Summary
 Diagnostics = cbind(olympic.leapCP$which, Cp=round(olympic.leapCP$Cp,2), aR2=round(olympic.leapR2a$adjr2,2),
       AIC=matrix(unlist(lapply(allModelsResults.lm, function(x) round(extractAIC(x),2))), ncol=2, byrow=TRUE)[,2], PRESS = olympic.lm_press)
@@ -381,7 +382,6 @@ par(mfrow=c(1,2))
 plot(x=Olympic_v2$count, y = exp(olympic.lmfinal$fitted.values), col='blue', pch=20, xlab='Actual',
      ylab='Predicted', main='OLS Linear Regression')
 abline(a=0,b=1, col='red')
-
 plot(x=Olympic_v2$count, y = olympic.nb$fitted.values, col='blue', pch=20, xlab='Actual',
      ylab='Predicted', main='Negative Binomial Regression')
 abline(a=0,b=1, col='red')
@@ -395,7 +395,6 @@ df_133<-data.frame(matrix(c(
 '0.867 (0.190)','0.829 (0.199)','0.311 (0.042)','0.693 (0.159)','0.608 (0.153)',
 '1.033 (0.105)','1.04 (0.110)','1.02 (0.037)','1.03 (0.098)','1.08 (0.097)'
 ), ncol = 5, byrow = T))
-
 colnames(df_133)<-c(
 'Linear',
 'Robust (Bisquare)',
@@ -403,7 +402,6 @@ colnames(df_133)<-c(
 'Neg Binom',
 'Neg Binom (fixed effects')
 rownames(df_133)<-c('Intercept','log(GDP/Cap)','log(Pop)','Host','Soviet/Comm')
-
 kable(df_133, caption = 'Coefficient Comparison')
 ```
 
@@ -414,16 +412,13 @@ kable(df_133, caption = 'Coefficient Comparison')
 # Appendix B
 ```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Appendix C: Influential Cases
+```{r, echo = F, include = F}
+#Influential cases
+olympic.lm_inf=influence.measures(olympic.lmfinal)$is.inf
+idx=which(apply(olympic.lm_inf,1,any))
+#Influential Cases
+Olympic[idx,]
+#Inluential Cases by Test
+olympic.lm_inf[idx,]
+```
