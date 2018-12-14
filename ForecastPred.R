@@ -53,3 +53,25 @@ forecast.nb = cbind(base.2016$count,lower.pred.nb,upper.pred.nb)
 
 ininterval = cbind(forecast.nb[,2]<=forecast.nb[,1] & forecast.nb[,3]>=forecast.nb[,1])
 length(which(ininterval))
+
+#NB Method 2 (works!)
+library(tidyverse)
+library(ciTools)
+library(MASS) 
+
+set.seed(20181215)
+
+base.2016 = base[which(base$year==2016),]
+attach(base.2016)
+base.2016 = data.frame(country,count,year,log_pop=log(pop),log_gdp_pcap = log(gdp/pop),host,comm_soviet)
+
+newData <- data.frame(base.2016[,c(2,4,5,6,7)])
+train_data <- Olympic_v2[,3:7]
+
+#Generate prediction intervals
+olympic.nb = glm.nb(count ~ log_pop + log_gdp_pcap + host + comm_soviet,data=train_data)
+
+#add_pi comes from the library ciTools
+olympic.nb_pint <- add_pi(tb=newData,fit=olympic.nb, names=c("lpb", "upb"), alpha=0.1, nSims=20000)
+
+
