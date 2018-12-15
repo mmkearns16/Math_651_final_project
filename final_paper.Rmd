@@ -473,15 +473,6 @@ kable(cbind(which, Parameters = olympic.nb_leap$size, Cp.nb, AIC.nb), caption = 
 
 \newpage
 
-```{r AIC_comp, echo = F}
-df_20<-data.frame(matrix(c(2008.82, 442.44, 279.47, 2319.23,  480.74, 675.54), nrow = 2, byrow = T))
-colnames(df_20)<-c('AIC', 'MSE', 'MSE (out of sample)')
-rownames(df_20)<-c('Linear', 'Negative Binomial')
-kable(df_20, caption = 'Linear vs. GLM Model Comparison (Absolute Scale)')
-```
-
-\newpage
-
 ```{r pred_vs_act, echo = F, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Comparison of Predicted vs. Actual'}
 par(mfrow=c(1,2))
 plot(x=Olympic_v2$count, y = exp(olympic.lmfinal$fitted.values), col='blue', pch=20, xlab='Actual',
@@ -494,22 +485,14 @@ abline(a=0,b=1, col='red')
 
 \newpage
 
-```{r intervals, echo = F, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Linear Prediction intervals vs actual count.'}
-
-plot(1:81, preds.nb$count, col = 'red', pch = 20, ylim = c(0, 150), xlab = '', ylab = 'Interval (Blue) Vs. Actual (Red)')
-points(1:81, exp(forecast.lm[,2]), pch = 20, col = 'blue')
-points(1:81, exp(forecast.lm[,3]), pch = 20, col = 'blue')
+```{r AIC_comp, echo = F}
+df_20<-data.frame(matrix(c(2008.82, 442.44, 279.47, 2319.23,  480.74, 675.54), nrow = 2, byrow = T))
+colnames(df_20)<-c('AIC', 'MSE', 'MSE (out of sample)')
+rownames(df_20)<-c('Linear', 'Negative Binomial')
+kable(df_20, caption = 'Linear vs. GLM Model Comparison (Absolute Scale)')
 ```
 
 \newpage
-
-```{r, echo = F, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Negative Binomial Prediction intervals vs actual count.'}
-plot(1:81, preds.nb$count, col = 'red', pch = 20, ylim = c(0, 150), xlab = '', ylab = 'Interval (Blue) Vs. Actual (Red)')
-points(1:81, preds.nb$lpb, pch = 20, col = 'blue')
-points(1:81, preds.nb$upb, pch = 20, col = 'blue')
-```
-
- \newpage
  
 ```{r coeff, echo = F}
 df_133<-data.frame(matrix(c(
@@ -530,7 +513,7 @@ kable(df_133, caption = 'Coefficient Comparison')
 ```
 
 \newpage
-
+\newpage
 \newpage
 
 # Appendix B: Influential Cases
@@ -552,3 +535,14 @@ kable(olympic.lm_inf[idx,])
 # Appendix C
 ```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
 ```
+
+\newpage
+
+# Appendix D
+
+```{r, echo = F}
+
+kable(cbind('Count' = preds.nb$count, 'NB Predictions' = round(preds.nb$pred, 2), 'NB Interval' = paste('(', preds.nb$lpb, ', ', preds.nb$upb, ')', sep = ''), 'Linear Predictions'=round(exp(fitted.lm), 2), 'Linear Intervals' = paste('(', round(exp(forecast.lm[,2])), ', ', round(exp(forecast.lm[,3])), ')', sep = '')), caption = 'Out-of-sample Predicted Values')
+
+```
+
