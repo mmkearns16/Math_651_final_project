@@ -45,7 +45,7 @@ We model on the total number of medal counts, by participating country and year 
 Table 1 and Figure 1 both illustrate that the medal counts exhibit right-skewed distribution. Among countries that have won at least one medal, the median medal count is 5, while the mean medal count is 12. The skewed distribution suggests the need for a log transformation (in the case of a linear model), which can also ensure that the predictions are positive numbers. Moreover, given we are modeling on count data, where large counts rarely occur, a Poisson model may be more appropriate than linear regression.
 
 ### Predictor Variables
-Based on existing literature (Bernard and Busse 2006, Goldman Sachs 2016, Bian 2005), potentially significant predictors of medal count include size of population, GDP per capita, whether or not a country has hosted or will host a summer Olymipcs, and whether or not a country is or was a command economy.
+Based on existing literature (Bernard and Busse 2006, Goldman Sachs 2016, Bian 2005), potentially significant predictors of medal count include size of population, GDP per capita, whether or not a country has hosted or will host a summer Olympics, and whether or not a country is or was a command economy.
 
 $X_1: Population$: This variable indicates population of people in the country in the associated year. Figure 2 shows a histogram of the population data. The left chart illustrates the right-skewed distribution of the original data (with China and India representing the far right). The right chart shows that applying a natural log transformation reduces the skewness and the influence of extreme X variable values on the model. 
 
@@ -171,7 +171,7 @@ par(mfrow=c(2,2))
 plot(olympic.lmfinal)
 ```
 
-According to the Normal Q-Q plot (Figure X), it is reasonable to assume the residuals follow a normal distribution. Hoever, the Residuals vs Fitted plot indicates possible heteroskedasticity or non-constant variance of the errors. The Breusch-Pagan test will help us determine if heteroskedasticity is affecting the model.
+According to the Normal Q-Q plot (Figure X), it is reasonable to assume the residuals follow a normal distribution. However, the Residuals vs Fitted plot indicates possible heteroskedasticity or non-constant variance of the errors. The Breusch-Pagan test will help us determine if heteroskedasticity is affecting the model.
 
 
 Assuming $Var(\epsilon_i)=\sigma^2_i$ such that $\text{log}_e\sigma_i^2=\gamma_0+\gamma_1X_i$:
@@ -201,7 +201,7 @@ We attempt to correct for non-constant variance and outliers by using robust lin
 
 
 #### Influential Cases
-Appendix C summarizes the influential cases in our model. We can see from the list that high populous countries, such as the United States, China, and India are influential on our model. Additionally, many of the influential cases are identified as being host nations. We wanted to identify these influential cases for the sake of full analysis, but we are choosing to not delete them from the model because they are important data points. It would not be feasible to delete 37 points and high populous countries are important to the analysis.
+Appendix C summarizes the influential cases in our model. We can see from the list that highly populous countries, such as the United States, China, and India are influential on our model. Additionally, many of the influential cases are identified as being host nations. We wanted to identify these influential cases for the sake of full analysis, but we are choosing to not delete them from the model because they are important data points. It would not be feasible to delete 37 points and high populous countries are important to the analysis.
 
 
 ### Generalized Linear Model
@@ -246,7 +246,7 @@ $$\text{ln}(Y_it) = \beta_0+\beta_1X_1it+\beta_2X_2it+\beta_3X_3it+\beta_4X_4it+
 
 $$\text{ln}(Y_it) = \beta_0+\beta_1X_1it+\beta_2X_2it+\beta_3X_3it+\beta_4X_4it+v_i$$
 
-where $d_i$ and $v_i$ represent dummies for year $t$ and country $i$, respectively. The year fixed effect accounts for changing number of sports and number of country participants. The country fixed effect accounts for unobservable factors that vary little over time, such as a country’s investment in national sports teams, cultural attitude toward the Olympics, etc.
+where $d_i$ and $v_i$ represent dummies for year $t$ and country $i$, respectively. The year fixed effect accounts for changing number of sports and number of country participants. The country fixed effect accounts for unobserved factors that vary little over time, such as a country’s investment in national sports teams, cultural attitude toward the Olympics, etc.
 
 
 ```{r weird algorithm thing, echo = F}
@@ -263,6 +263,69 @@ allModelsResults <- lapply(allModelsList,
 AIC.nb<-matrix(unlist(lapply(allModelsResults, function(x) round(extractAIC(x),2))), ncol = 2, byrow = T)[,2]
 library(knitr)
 ```
+
+```{r, echo = F, eval = F, include = F}
+#2016 Data
+base.2016 = base[which(base$year==2016),]
+attach(base.2016)
+base.2016 = data.frame(country,count,year,log_pop=log(pop),log_gdp_per_cap = log(gdp/pop),host,comm_soviet)
+
+
+#Linear Fitted
+fitted.lm = -9.63058+0.40830*base.2016$log_gdp_per_cap+0.44275*base.2016$log_pop+0.86726*base.2016$host+1.03281*base.2016$comm_soviet
+#olympic.lmfinal  
+  
+  
+
+
+#Prediction intervals: Linear Model
+nrow(base.2016)-5
+t=qt(1-0.05/2,76)
+mse.lm = 0.751
+X = as.matrix(cbind(rep(1,nrow(Olympic_v2)),Olympic_v2$log_gdp_per_cap,Olympic_v2$log_pop,Olympic_v2$host,Olympic_v2$comm_soviet))
+
+spred = c()
+for (i in 1:nrow(base.2016)){
+  xh = as.matrix(cbind(1,base.2016$log_gdp_per_cap[i],base.2016$log_pop[i],base.2016$host[i],base.2016$comm_soviet[i]))
+  s2 = mse.lm*(1+xh%*%solve(t(X)%*%X)%*%t(xh))
+  spred = c(spred,sqrt(s2))
+}
+
+lower.pred = fitted.lm - qt(1-0.05/2,76)*spred
+upper.pred = fitted.lm + qt(1-0.05/2,76)*spred
+
+forecast.lm = cbind(log(base.2016$count),lower.pred,upper.pred)
+ininterval.lm = cbind(forecast.lm[,2]<=forecast.lm[,1] & forecast.lm[,3]>=forecast.lm[,1])
+length(which(ininterval.lm))
+
+#NB Method 2 (works!)
+library(tidyverse)
+library(ciTools)
+library(MASS) 
+
+set.seed(20181215)
+
+base.2016 = base[which(base$year==2016),]
+attach(base.2016)
+base.2016 = data.frame(country,count,year,log_pop=log(pop),log_gdp_per_cap = log(gdp/pop),host,comm_soviet)
+
+newData <- data.frame(base.2016[,c(2,4,5,6,7)])
+train_data <- Olympic_v2[,3:7]
+
+#Generate prediction intervals
+olympic.nb = glm.nb(count ~ log_pop + log_gdp_per_cap + host + comm_soviet,data=train_data)
+
+#add_pi comes from the library ciTools
+olympic.nb_pint <- add_pi(tb=newData,fit=olympic.nb, names=c("lpb", "upb"), alpha=0.1, nSims=20000)
+
+
+olympic.nb_pint %>%
+  mutate(inside=(pred >lpb & pred<upb))-> preds.nb
+
+summary(preds.nb)
+
+```
+
 
 # Results 
 
@@ -282,7 +345,7 @@ Interestingly, table 6 shows that the OLS linear regression has better model fit
 
 ## 2016 Out-of-sample Projection:
 
-As part of the data collection process, information for the year 2016 was also researched, but left out of the original analysis. Therefore, because the data was not part of the training set, we can use it as a testing set. The medal count data for 2016 is similarly distributed to the overal training data, so testing on it is a feasible plan.
+As part of the data collection process, information for the year 2016 was also researched, but left out of the original analysis. Therefore, because the data was not part of the training set, we can use it as a testing set. The medal count data for 2016 is similarly distributed to the overall training data, so testing on it is a feasible plan.
 
 To determine the accuracy of each of our models we determined 95% prediction intervals for each of the 81 points in the 2016 medal count data. Then we calculated the ratio of data points that had their actual counts within their respective prediction intervals to total number of data points. For our estimated linear regression function, 
 $$\hat{Y} = -9.63058+0.44275X_1+0.40830X_2+0.86726X_3+1.03281X_4$$
@@ -424,13 +487,21 @@ kable(df_133, caption = 'Coefficient Comparison')
 # Appendix B
 ```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
 ```
+
+\newpage
+
 # Appendix C: Influential Cases
-```{r, echo = F, include = T}
+```{r, echo = F, include = T, comment = NA}
 #Influential cases
 olympic.lm_inf=influence.measures(olympic.lmfinal)$is.inf
 idx=which(apply(olympic.lm_inf,1,any))
 #Influential Cases
-Olympic[idx,]
+kable(Olympic[idx,])
+```
+
+\newpage
+
+```{r, echo = F, include = T, comment = NA}
 #Inluential Cases by Test
-olympic.lm_inf[idx,]
+kable(olympic.lm_inf[idx,])
 ```
