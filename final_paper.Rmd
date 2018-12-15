@@ -320,10 +320,18 @@ olympic.nb_pint <- add_pi(tb=newData,fit=olympic.nb, names=c("lpb", "upb"), alph
 
 
 olympic.nb_pint %>%
-  mutate(inside=(pred >lpb & pred<upb))-> preds.nb
+  mutate(inside=(count >lpb & count<upb))->preds.nb
 
 summary(preds.nb)
 
+
+####finding MSEs
+preds<-data.frame(matrix(cbind(base.2016$count, preds.nb$pred, exp(fitted.lm)), ncol = 3))
+
+colnames(preds)<-c('Actual', 'Prediction.nb', 'Prediction.lm')
+
+mse.nb<-mean((preds$Actual-preds$Prediction.nb)^2)
+mse.lm<-mean((preds$Actual-preds$Prediction.lm)^2)
 ```
 
 
@@ -350,6 +358,10 @@ As part of the data collection process, information for the year 2016 was also r
 To determine the accuracy of each of our models we determined 95% prediction intervals for each of the 81 points in the 2016 medal count data. Then we calculated the ratio of data points that had their actual counts within their respective prediction intervals to total number of data points. For our estimated linear regression function, 
 $$\hat{Y} = -9.63058+0.44275X_1+0.40830X_2+0.86726X_3+1.03281X_4$$
 74 out of 81 points had medal counts within their respective 95% prediction intervals. 
+
+The same analysis on the negative binomial model showed that a similar number of the 95% predictions intervals for 2016 fell around their observed intervals.
+
+$$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = -10.16577+0.49848X_1+0.40239X_2+0.69267X_3+1.03376X_4$$
 
 # Discussion and Conclusions
 
@@ -444,10 +456,10 @@ kable(cbind(which, Parameters = olympic.nb_leap$size, Cp.nb, AIC.nb), caption = 
 \newpage
 
 ```{r AIC_comp, echo = F}
-df_20<-data.frame(matrix(c(2008.82, 0.751, 'TBD', 2319.23,  0.822, 'TBD'), nrow = 2, byrow = T))
+df_20<-data.frame(matrix(c(2008.82, 442.44, 279.47, 2319.23,  480.74, 675.54), nrow = 2, byrow = T))
 colnames(df_20)<-c('AIC', 'MSE', 'MSE (out of sample)')
 rownames(df_20)<-c('Linear', 'Negative Binomial')
-kable(df_20, caption = 'Linear vs GLM Model Comparison')
+kable(df_20, caption = 'Linear vs. GLM Model Comparison (Absolute Scale)')
 ```
 
 \newpage
