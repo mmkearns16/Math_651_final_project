@@ -376,6 +376,16 @@ options(scipen = 999)
 kable(rbind('Count'=summary(Olympic_v2$count), 'Population'=summary(exp(Olympic_v2$log_pop)), 'GDP/Cap'=summary(exp(Olympic_v2$log_gdp_per_cap))), caption = 'Summary of Numerical Variables')
 ```
 
+```{r, echo = F}
+this<-rbind('Host' = unname(table(Olympic_v2$host)),
+'Communist/Soviet' = unname(table(Olympic_v2$comm_soviet)))
+
+colnames(this)<-c('Off', 'On')
+
+kable(this, caption = 'Summary of Categorical Variables')
+```
+
+
 ```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Distribution of Count', fig.height=3}
 hist(Olympic_v2$count, lwd = 4, xlab = '', main = '')
 ```
@@ -439,6 +449,11 @@ colnames(Diagnostics) = c("1","2","3","4","Cp","aR2","AIC","PRESS")
 ```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Exploratory Linear Model Plots'}
 par(mfrow=c(2,2))
 plot(olympic.lmfinal)
+```
+
+```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Exploratory Negative Binomial Model Plots'}
+par(mfrow=c(2,2))
+plot(olympic.nb)
 ```
 
 \newpage
