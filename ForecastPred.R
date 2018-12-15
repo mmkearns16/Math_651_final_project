@@ -52,15 +52,21 @@ olympic.nb = glm.nb(count ~ log_pop + log_gdp_per_cap + host + comm_soviet,data=
 olympic.nb_pint <- add_pi(tb=newData,fit=olympic.nb, names=c("lpb", "upb"), alpha=0.1, nSims=20000)
 
 
+
 olympic.nb_pint %>%
-  mutate(inside=(pred >lpb & pred<upb))-> preds.nb
+  mutate(inside=(count >lpb & count<upb))->preds.nb
 
 summary(preds.nb)
 
 
+####finding MSEs
 
+preds<-data.frame(matrix(cbind(base.2016$count, preds.nb$pred, exp(fitted.lm)), ncol = 3))
 
+colnames(preds)<-c('Actual', 'Prediction.nb', 'Prediction.lm')
 
+mse.nb<-mean((preds$Actual-preds$Prediction.nb)^2)
+mse.lm<-mean((preds$Actual-preds$Prediction.lm)^2)
 
 
 

@@ -371,9 +371,9 @@ $$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = -10.16577+0.49848X_1+0.40239X_2
 \newpage
 # Appendix A
 ```{r, echo = F}
-df_1<-data.frame(matrix(summary(Olympic_v2$count), ncol = 6))
-colnames(df_1)<-c('Min.', '1st Qu.','Median',    'Mean', '3rd Qu.',    'Max')
-kable(df_1, caption = 'Summary of Count Variable')
+options(scipen = 999)
+
+kable(rbind('Count'=summary(Olympic_v2$count), 'Population'=summary(exp(Olympic_v2$log_pop)), 'GDP/Cap'=summary(exp(Olympic_v2$log_gdp_per_cap))), caption = 'Summary of Numerical Variables')
 ```
 
 ```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Distribution of Count', fig.height=3}
