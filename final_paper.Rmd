@@ -201,7 +201,7 @@ We attempt to correct for non-constant variance and outliers by using robust lin
 
 
 #### Influential Cases
-Appendix C summarizes the influential cases in our model. We can see from the list that highly populous countries, such as the United States, China, and India are influential on our model. Additionally, many of the influential cases are identified as being host nations. We wanted to identify these influential cases for the sake of full analysis, but we are choosing to not delete them from the model because they are important data points. It would not be feasible to delete 37 points and high populous countries are important to the analysis.
+Appendix B summarizes the influential cases in our model. We can see from the list that highly populous countries, such as the United States, China, and India are influential on our model. Additionally, many of the influential cases are identified as being host nations. We wanted to identify these influential cases for the sake of full analysis, but we are choosing to not delete them from the model because they are important data points. It would not be feasible to delete 37 points and high populous countries are important to the analysis.
 
 
 ### Generalized Linear Model
@@ -370,6 +370,20 @@ $$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = -10.16577+0.49848X_1+0.40239X_2
 
 \newpage
 # Appendix A
+
+```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Distribution of Count', fig.height=3}
+hist(Olympic_v2$count, lwd = 4, xlab = '', main = '')
+```
+
+
+```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Histogram of the Population Variables'}
+par(mfrow=c(1,2))
+#Histogram Population
+hist(base$pop,main = "Untransformed",xlab = "Population")
+#Histogram log(Population)
+hist(log(base$pop),main = "Transformed",xlab = "log(Population)")
+```
+
 ```{r, echo = F}
 options(scipen = 999)
 
@@ -383,19 +397,6 @@ this<-rbind('Host' = unname(table(Olympic_v2$host)),
 colnames(this)<-c('Off', 'On')
 
 kable(this, caption = 'Summary of Categorical Variables')
-```
-
-
-```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Distribution of Count', fig.height=3}
-hist(Olympic_v2$count, lwd = 4, xlab = '', main = '')
-```
-
-```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Histogram of the Population Variables'}
-par(mfrow=c(1,2))
-#Histogram Population
-hist(base$pop,main = "Untransformed",xlab = "Population")
-#Histogram log(Population)
-hist(log(base$pop),main = "Transformed",xlab = "log(Population)")
 ```
 
 ```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Scatter Matrix'}
@@ -445,6 +446,8 @@ Diagnostics = cbind(olympic.leapCP$which, Cp=round(olympic.leapCP$Cp,2), aR2=rou
 #PRESS wasn't showing as column name
 colnames(Diagnostics) = c("1","2","3","4","Cp","aR2","AIC","PRESS")
 ```
+
+\newpage
 
 ```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Exploratory Linear Model Plots'}
 par(mfrow=c(2,2))
@@ -498,6 +501,8 @@ points(1:81, exp(forecast.lm[,2]), pch = 20, col = 'blue')
 points(1:81, exp(forecast.lm[,3]), pch = 20, col = 'blue')
 ```
 
+\newpage
+
 ```{r, echo = F, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Negative Binomial Prediction intervals vs actual count.'}
 plot(1:81, preds.nb$count, col = 'red', pch = 20, ylim = c(0, 150), xlab = '', ylab = 'Interval (Blue) Vs. Actual (Red)')
 points(1:81, preds.nb$lpb, pch = 20, col = 'blue')
@@ -525,15 +530,10 @@ kable(df_133, caption = 'Coefficient Comparison')
 ```
 
 \newpage
-\newpage
-
-# Appendix B
-```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
-```
 
 \newpage
 
-# Appendix C: Influential Cases
+# Appendix B: Influential Cases
 ```{r, echo = F, include = T, comment = NA}
 #Influential cases
 olympic.lm_inf=influence.measures(olympic.lmfinal)$is.inf
@@ -547,4 +547,8 @@ kable(Olympic[idx,])
 ```{r, echo = F, include = T, comment = NA}
 #Inluential Cases by Test
 kable(olympic.lm_inf[idx,])
+```
+
+# Appendix C
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
 ```
