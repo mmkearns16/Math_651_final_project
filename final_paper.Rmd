@@ -2,14 +2,14 @@
 title: "Math 651 Final Project"
 author: "Mary Peng, Hillary Dunn, and Max Kearns"
 date: "December 17, 2018"
-output:
-  pdf_document:
-    number_sections: yes
+output: word_document
 ---
 
 ```{r setup, include=FALSE, cache = T}
-knitr::opts_chunk$set(echo = FALSE, fig.pos = 'H', comment = NA)
-base <-read.csv('data/base_data.csv', stringsAsFactors = F)
+knitr::opts_chunk$set(echo = FALSE, comment = NA)
+setwd('C:/Users/mpeng/Documents/Math_651_final_project/data')
+
+base <-read.csv('base_data.csv', stringsAsFactors = F)
 P__disp <- function(x) {
   pr <- sum(residuals(x, type="pearson")^2)
   dispersion <- pr/x$df.residual
@@ -29,38 +29,37 @@ Olympic_v2 <- data.frame(year = Olympic$year, country = Olympic$country, count =
 
 # Introduction
 
-Every four summers, the Olympic Games become the center of the world’s attention, as elite athletes seek honor for both themselves and for their countries. Many countries associate tremendous national pride with their medal counts, since a nation’s athletic competence also projects its soft power. 
+Every four summers, the Olympic Games become the center of the world's attention, as elite athletes seek honor for both themselves and for their countries. Many countries associate tremendous national pride with their medal counts, since a nation's athletic competence also projects its soft power. 
 
 Given the fierce competition and high profile nature of medal counts, one may wonder what factors influence the number of medals that a country wins at the summer Olympics. Certainly countries with the largest economies and populations, such as the United States and China, commonly dominate the top of the billboard. However, Azerbaijan, which ranks 91st in population and 72nd in total GDP, also ranked in the top 20 countries by total medal count in the 2016 Summer Olympics. 
 
-Our team will develop multiple regression models using predictors like GDP per Capita, Population, whether a country is a host country, and whether a country is a former soviet or communist state. We will use these factors to predict medal count, and examine how these each of these factors influences medal count. We will build the model on countries’ total medal count for the 1996, 2004, 2008, and 2012 Olympics, and then project the model onto the 2016 Olympics to understand the accuracy of the model’s predictions. 
+This paper develops and compares several regression models using predictors like GDP per Capita, Population, whether a country has or will host a summer Olympics, and whether a country was ever a Soviet or Communist state. We pool country-year medal count observations from the 1996, 2004, 2008, and 2012 Olympics, and then project the model onto the 2016 Olympics to understand the model's prediction accuracy. We focus specifically on countries that have won at least one Olympic medal in a given summer Olympics, because of data availability.  
 
 # Methods and Materials
 
 ## Data 
 
 ### Dependent Variable
-We model on the total number of medal counts, by participating country and year during which a Summer Olympics occurred. The dependent variable data come from a website called $www.medalspercapita.com$. For any given Summer Olympics, this website only lists the 80 - 90 countries that have won at least one medal, out of the 200 or so nations that participate in each summer Olympics. 
+We model on the total medal count, by participating country and year during which a Summer Olympics occurred. The medal count data come from a website called $www.medalspercapita.com$. For any given Summer Olympics, this website only lists the 80 - 90 countries that have won at least one medal, out of the 200 or so nations that participate in each summer Olympics. 
 
 Table 1 and Figure 1 both illustrate that the medal counts exhibit right-skewed distribution. Among countries that have won at least one medal, the median medal count is 5, while the mean medal count is 12. The skewed distribution suggests the need for a log transformation (in the case of a linear model), which can also ensure that the predictions are positive numbers. Moreover, given we are modeling on count data, where large counts rarely occur, a Poisson model may be more appropriate than linear regression.
 
 ### Predictor Variables
-Based on existing literature (Bernard and Busse 2006, Goldman Sachs 2016, Bian 2005), potentially significant predictors of medal count include size of population, GDP per capita, whether or not a country has hosted or will host a summer Olympics, and whether or not a country is or was a command economy.
+Based on existing literature (Bernard and Busse 2006, Goldman Sachs 2016, Bian 2005), potentially significant predictors of medal count include a country's population size, GDP per capita, whether or not a country has hosted or will host a summer Olymipcs, and whether or not a country has ever been a command economy.
 
-$X_1: Population$: This variable indicates population of people in the country in the associated year. Figure 2 shows a histogram of the population data. The left chart illustrates the right-skewed distribution of the original data (with China and India representing the far right). The right chart shows that applying a natural log transformation reduces the skewness and the influence of extreme X variable values on the model. 
+$X_1: Population$: This variable indicates a country's population size in a given Olympic year. The left histogram in Figure 2 illustrates the right-skewed distribution of population across countries that won at least one medal (with China and India representing the far right). The right chart shows that applying a natural log transformation reduces the skewness and the influence of extreme X variable values on the model. 
 
-$X_2: GDP/Capita$: This variable indicates GDP per capita in the associated year. These data show a similar distribution to the population variable, so we also applied the natural log transformation.
+$X_2: GDP/Capita$: This variable indicates a country's GDP per capita in a given Olympic year. These data show a similar distribution to the population variable, so we also applied the natural log transformation as well.
 
 $X_3: Host (1/0)$: This is a binary predictor variable with value equal to 1 if a country has hosted a summer Olympics in the 8 years prior to the Olympics in consideration, or will host in the next 8 years. For example, Greece, which hosted the 2004 Olympics, will have value = 1 for the 1996, 2000, 2004, 2008, and 2012 Olympics. 25 observations are classified as a host by this measure. 
 
-$X_4: Command Economy  (1/0)$: This binary predictor variable indicates whether the country was once a member of the Soviet Union or Yugoslavia, or ruled by a Communist party. We assembled a list of formerly or currently Soviet, Yugoslavian, or Communist countries using $www.worldatlast.com$, $Wikepedia$'s list of communist parties, and $www.sporcle.com$. 111 data points are classified as former Soviet Union or Communist.
+$X_4: Command Economy  (1/0)$: This binary predictor variable indicates whether the country was once a member of the Soviet Union or Yugoslavia, or ruled by a Communist party. We assembled a list of formerly or currently Soviet, Yugoslavian, or Communist countries using $www.worldatlast.com$, $Wikepedia$'s list of communist parties, and $www.sporcle.com$. 111 data points are classified as former Soviet Union or Communist. We hypothesize that former or current command economy countries will have higher medal count than other similar countries, because these countries can effectively centralize resources to invest into national sports teams. 
 
-We generate a correlation matrix (Table 3) and paired scatterplot (Figure 3) to illustrate the relationships between the variables, especially any multicollinearity. 
+We generate a correlation matrix (Table 2) and paired scatterplot (Figure 3) to illustrate the relationships between the variables and identify potential dangers of multicollinearity if we use these variables in a linear regression. 
 
-The scatter plot matrix in Figure 3 shows positive correlation between count of medals and population size. We do not observe strong linear relationship between medal count and GDP per capita, whether or not a country has hosted or will host, and whether a country used to be part of a Command Economy. The correlation matrix corroborates the finding that population size has the strongest linear correlation with medal count (correlation = 0.48), and Command Economy (Y/N) has the weakest linear correlation (correlation = 0.09).
+The scatter plot matrix in Figure 3 shows positive correlation between count of medals and population size. Overall, we do not observe strong linear relationship (defined here as r > 0.5) between medal count and any of the above predictor variables under consideration. Population size has the strongest linear correlation with medal count (correlation = 0.48), and Command Economy (Y/N) has the weakest linear correlation (correlation = 0.09).
 
-This correlation matrix in Table 3 also suggests that collinearity between variables will not be a significant problem. The most significant correlation between predictor variables is between the log of the GDP per capita and the indicator of Communism or Soviet Union inclusion variable. However, the correlation coefficient is only -0.2989. This suggests that multicollinearity should not be much of an issue.
-
+The correlation matrix in Table 3 also suggests that collinearity between variables will not be a significant problem. Log GDP per capita and Command Economy (1/0) has the strongest linear correlation, but their correlation coefficient is still only -0.299. This finding alleviates concern of multicollinearity when we build linear regression using these variables.
 
 ```{r, include = F, echo=FALSE}
 library(knitr)
@@ -96,7 +95,7 @@ sum(base$host)
 ```
 
 
-```{r pop_hists, fig.height = 3, echo=FALSE, include = F}
+```{r pop_hists, echo=FALSE, include = F}
 par(mfrow=c(1,2))
 #Histogram Population
 hist(base$pop,main = "Untransformed",xlab = "Population")
@@ -146,33 +145,31 @@ vec <- olympic.leapCP$which
 names(vec) <- paste("X", 1:4, sep="")
   #### Build matrix of formula for every row
 allModelsList <- apply(vec, 1, function(x) as.formula(
-  paste(c("count ~ 1", xList[x]), collapse = "+")))
+  paste(c("log(count) ~ 1", xList[x]), collapse = "+")))
   ### Calculate the coefficients for all 16 models
 allModelsResults.lm <- lapply(allModelsList, 
                            function(x) lm(x, data=Olympic_v2))
 ```
 
 
-According to the selected model diagnostics shown in Table 4, the model with the smallest $C_p$ statistic, largest adjusted $R^2$ value, smallest AIC and smallest PRESS value is the model that includes all four predictor variables. We constructed a linear model (shown below), using the natural log to transform the count data. We decided to transform the count data to get the response variable to look more normally distributed so that it would follow the linear regression assumption that the response variable needs to be approximately normally distributed.
+As previously mentioned, we take the natural log of the medal count variable as the dependent variable, so that it satisfies the normal distribution assumption for linear regression. We then select the best variable subset using $C_p$ statistic,adjusted $R^2$ value, AIC, and PRESS. Table 3 shows that the model containing all four predictor variables has the smallest $C_p$ statistic, the largest adjusted $R^2$ value, the smallest AIC, and the smallest PRESS value. 
 
 ```{r, echo = F}
 olympic.lmfinal <- lm(log_count ~ log_pop + log_gdp_per_cap + host + comm_soviet, data = Olympic_v2)
 ```
+Our final linear regression specification is: $$\hat{Y} = -9.63+0.44X_1+0.41X_2+0.87X_3+1.03X_4 (1)$$  
 
-$$X_1 = \text{ln(population)}$$
-$$X_2 = \text{ln(gdp/capita)}$$
-$$X_3 = \text{host}$$
-$$X_4 = \text{Soviet Country or Communist}$$
-$$Y = \text{ln(Count)}$$
-$$\hat{Y} = -9.63058+0.44275X_1+0.40830X_2+0.86726X_3+1.03281X_4$$
+where $Y = \text{ln(Count)}$, $X_1 = \text{ln(population)}$, $X_2 = \text{ln(gdp/capita)}$, $X_3 = \text{host(1/0)}$, and $X_4 = \text{Command Economy (1/0)}$
+
 
 ```{r, echo=FALSE, include = F}
 par(mfrow=c(2,2))
 plot(olympic.lmfinal)
 ```
 
-According to the Normal Q-Q plot (Figure 4), it is reasonable to assume the residuals follow a normal distribution. However, the Residuals vs Fitted plot indicates possible heteroskedasticity or non-constant variance of the errors. The Breusch-Pagan test will help us determine if heteroskedasticity is affecting the model.
+Table 7 shows the coefficient values and their standard deviations. We conduct inference on each predictor variable, with $$H_0:\beta_i\text{ vs. } H_a:\beta_i\neq0$$. We reject $H_0$ at $\alpha = 0.05$ if $t^*=\beta_i/s_i > t(\alpha)$. We find that all 4 predictor variables are statistically significant at $\alpha = 0.05$.
 
+The residual vs. fitted plot shows distinct diagonal bands, particularly one that bounds all other observations from the lower right. This lower bound corresponds to the minimum value of 1 medal count among our observations. The other individual bands reflect the discrete nature of the dependent variable. The residuals vs. fitted plot also shows potential heteroskedasticity, with larger variance among the smaller fitted values and smaller variance among the larger values. This distribution makes sense because we expect the majority of countries to win relatively few medals, and a few countries to win large numbers of medals. We run a Breusch-Pagan test to assess the existence of heteroskedasticity. 
 
 Assuming $Var(\epsilon_i)=\sigma^2_i$ such that $\text{log}_e\sigma_i^2=\gamma_0+\gamma_1X_i$:
 
@@ -183,11 +180,13 @@ At significance level $\alpha = 0.05$, if the p-value of the Breusch-Pagan test 
 library(lmtest)
 bptest(log_count ~ log_pop + log_gdp_per_cap + host + comm_soviet,data = Olympic_v2,studentize = FALSE)
 ```
-The p-value $= 0.001587<\alpha$, therefore we conclude that our variance is not constant.
+The p-value $= 0.001587<\alpha$; we thus conclude that our variance is not constant. However, the heteroskedasticity does not cause serious concern; as discussed above, we expect the model to predict high medal count for very few observations (and thus lower variance) and low medal count for the majority of observations (and thus higher variance). 
+
+The Normal Q-Q plot (Figure 4) shows that the residuals generally follow a normal distribution. We validate the normality assumption by running a Lilliefors test.
 
 $$H_0: \text{Sample comes from a N(}\mu,\sigma^2\text{) distribution}$$
 $$H_a: \text{Sample does not come from a N(}\mu,\sigma^2\text{) distribution}$$
-At significance level $\alpha = 0.05$, if the p-value is less than $\alpha$ then we accept $H_a$ and reject $H_0$, otherwise we fail to reject $H_0$.
+At significance level $\alpha = 0.05$, we reject $H_0$ if the p-value is less than $\alpha$; otherwise we fail to reject $H_0$.
 
 ```{r, include=FALSE}
 library(nortest)
@@ -195,24 +194,21 @@ library(nortest)
 ```{r, include = F}
 lillie.test(olympic.lmfinal$residuals)
 ```
-The p-value$=0.2332>\alpha$, thus we fail to reject $H_0$. Therefore, it is reasonable to assume that the error terms are distributed normally.
+The p-value$=0.2332>\alpha$, thus we fail to reject $H_0$ in favor of $H_a$ and conclude that we can reasonably assume that the error terms follow a normal distribution.
 
-We attempt to correct for non-constant variance and outliers by using robust linear regression, with Huber and Bisquare weights. As shown in table 7, the coefficients generated through robust linear regression, using Bisquare weights, fall within +/- 5% of the corresponding OLS regressions. The robust regression’s standard errors are slightly larger than those of the OLS regression. We find similar results when using Huber weights. Re-running the Breusch-Pagan test results in a p-value of 0.002, which means we would still reject the null hypothesis of homoskedasticity at $\alpha$ = 0.05 level, and conclude that the robust regression still exhibits non-constant variance.
+Lastly, we check for influential cases. The Residuals vs. Leverage plot shows a few potential outliers. Appendix C summarizes the influential cases in our model, using Cook's Distance, DFFITS, DFBETAS, and COVRATIO. We consider an observation as an outlier if at least one of the above diagnostics flags it as influential. In total, we flag 37 out of 387 observations as outliers. Many of them are highly populous countries, such as the United States, China, and India. Additionally, many of the influential cases have hosted or will host the summer Olympics and have high medal count. We chose to keep these observations in the model, because they constitute 10% of our sample size and contian valuable information. 
 
-
-#### Influential Cases
-Appendix B summarizes the influential cases in our model. We can see from the list that highly populous countries, such as the United States, China, and India are influential on our model. Additionally, many of the influential cases are identified as being host nations. We wanted to identify these influential cases for the sake of full analysis, but we are choosing to not delete them from the model because they are important data points. It would not be feasible to delete 37 points and high populous countries are important to the analysis.
-
+Instead, we attempt to correct for non-constant variance and outliers by using robust linear regression, with Huber and Bisquare weights. As shown in table 7, the coefficients generated through robust linear regression, using Bisquare weights, fall within +/- 5% of the corresponding OLS regressions. The robust regression's standard errors are slightly larger than those of the OLS regression. We find similar results when using Huber weights. These results show that the influential cases in fact have limited influence on our model fit.
 
 ### Generalized Linear Model
 
-The first choice for a glm is typically a Poisson model, which may provide a reasonable model for these data. This generalized model was created with the same variables as the linear model; population, GDP per capita, the host dummy variable, and the communist/soviet dummy variable. 
+Given the dependent variable is medal count, we also considered fitting a Poisson model: We used the same variables as the linear model: $ln(population)$, $ln(GDP/capita)$, $host$, and $command$ $economy$, and obtained the following model:
 
-$$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = \beta_0+\beta_1X_1+\beta_2X_2+\beta_3X_3+\beta_4X_4$$
-$$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = -11.28882+0.50479X_1+0.52117X_2+0.31070X_3+1.02332X_4$$
+$$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = -11.29+0.51X_1+0.52X_2+0.31X_3+1.02X_4$$
 
+All 4 predictors are significant at $\alpha$ = 0.05. However, this model has dispersion = 6.621, which far exceeds the assumption of dispersion = 1 for Poisson distributions and would lead to under-estimation of standard error. 
 
-Like the linear model, the population and GDP per capita were log-transformed, but in this model it is unnecessary to transform the medal count. The full poisson model showed highly significant parameters, but the dispersion of this model was much greater than 1 (disp. = 6.621). This is a violation of the assumptions of a Poisson regression model, so a negative binomial model would likely provide a better fit for these data. 
+To account for the overdisperion, we consider a negative binomial model. Table 5 shows the Mallow's Cp statistic and AIC across different variable subsets using the negative binomial model form. Again, the full model has the lowest Cp and AIC. It has the following form: 
 
 ```{r, comment = NA, include=F}
 Olympic.pois<-glm(count~log_pop + log_gdp_per_cap + host + comm_soviet, data = Olympic_v2, family = poisson)
@@ -233,12 +229,14 @@ rownames(which) <-NULL
 colnames(which)<-c('Pop', 'GDP/C', 'Host', 'Soviet')
 ```
 
-A negative binomial regression model assumes that dispersion is greater than 1, which is consistent with these data. Therefore, it allows for more accurate tests of the parameters. Among the negative binomial models, the best model again proved to be the full model, after a comparison of AIC between all subsets of variables (Table 5).
+$$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = -10.17+0.50X_1+0.40X_2+0.69X_3+1.03X_4$$
 
-$$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = \beta_0+\beta_1X_1+\beta_2X_2+\beta_3X_3+\beta_4X_4$$
-$$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = -10.16577+0.49848X_1+0.40239X_2+0.69267X_3+1.03376X_4$$
+The above model has dispersion of 1.13, which gives us confidence in conducting inference on the model coefficients. We use the same hypothesis test as described previously, and find that all 4 predictor variables are statistically significant at $\alpha$ = 0.05.
 
-Independence among observations constitutes a key assumption for the Poisson and negative binomial regressions. Since our model uses panel data, observations over time for the same country will exhibit serial autocorrelation, thereby violating the independence assumption. Moreover, the medal counts among countries within a given year are not completely independent, because of the fixed total number of medals awarded in a single Olympic year.
+
+Figure 5 shows the residual plots using the above negative binomial regression. Overall, it appears very similar to the residual vs. fitted plots for the linear regression model, so we will not discuss it in detail.
+
+Independence among observations constitutes a key assumption for negative binomial regressions. Since our model uses panel data, observations over time for the same country will exhibit serial autocorrelation, thereby violating the independence assumption. Moreover, the medal counts among countries within a given year are not completely independent, because of the fixed total number of medals awarded in a single Olympic year.
 
 To address the above non-independence, we tried adding year and country fixed effects to the negative binomial regression. The models take the form: 
 
@@ -246,8 +244,7 @@ $$\text{ln}(Y_it) = \beta_0+\beta_1X_1it+\beta_2X_2it+\beta_3X_3it+\beta_4X_4it+
 
 $$\text{ln}(Y_it) = \beta_0+\beta_1X_1it+\beta_2X_2it+\beta_3X_3it+\beta_4X_4it+v_i$$
 
-where $d_i$ and $v_i$ represent dummies for year $t$ and country $i$, respectively. The year fixed effect accounts for changing number of sports and number of country participants. The country fixed effect accounts for unobserved factors that vary little over time, such as a country’s investment in national sports teams, cultural attitude toward the Olympics, etc.
-
+where $d_i$ and $v_i$ represent dummies for year $t$ and country $i$, respectively. The year fixed effect accounts for changing number of sports and number of country participants. The country fixed effect accounts for unobservable factors that vary little over time, such as a country's investment in national sports teams, cultural attitude toward the Olympics, etc. 
 
 ```{r weird algorithm thing, echo = F}
 xList <- names(Olympic_v2)[4:7]
@@ -264,77 +261,6 @@ AIC.nb<-matrix(unlist(lapply(allModelsResults, function(x) round(extractAIC(x),2
 library(knitr)
 ```
 
-```{r, echo = F, include = F}
-#2016 Data
-base.2016 = base[which(base$year==2016),]
-attach(base.2016)
-base.2016 = data.frame(country,count,year,log_pop=log(pop),log_gdp_per_cap = log(gdp/pop),host,comm_soviet)
-
-
-#Linear Fitted
-fitted.lm = -9.63058+0.40830*base.2016$log_gdp_per_cap+0.44275*base.2016$log_pop+0.86726*base.2016$host+1.03281*base.2016$comm_soviet
-#olympic.lmfinal  
-  
-  
-
-
-#Prediction intervals: Linear Model
-nrow(base.2016)-5
-t=qt(1-0.05/2,76)
-mse.lm = 0.751
-X = as.matrix(cbind(rep(1,nrow(Olympic_v2)),Olympic_v2$log_gdp_per_cap,Olympic_v2$log_pop,Olympic_v2$host,Olympic_v2$comm_soviet))
-
-spred = c()
-for (i in 1:nrow(base.2016)){
-  xh = as.matrix(cbind(1,base.2016$log_gdp_per_cap[i],base.2016$log_pop[i],base.2016$host[i],base.2016$comm_soviet[i]))
-  s2 = mse.lm*(1+xh%*%solve(t(X)%*%X)%*%t(xh))
-  spred = c(spred,sqrt(s2))
-}
-
-lower.pred = fitted.lm - qt(1-0.10/2,76)*spred
-upper.pred = fitted.lm + qt(1-0.10/2,76)*spred
-
-forecast.lm = cbind(log(base.2016$count),lower.pred,upper.pred)
-ininterval.lm = cbind(forecast.lm[,2]<=forecast.lm[,1] & forecast.lm[,3]>=forecast.lm[,1])
-length(which(ininterval.lm))
-
-#NB Method 2 (works!)
-library(tidyverse)
-library(ciTools)
-library(MASS) 
-
-set.seed(20181215)
-
-base.2016 = base[which(base$year==2016),]
-attach(base.2016)
-base.2016 = data.frame(country,count,year,log_pop=log(pop),log_gdp_per_cap = log(gdp/pop),host,comm_soviet)
-
-newData <- data.frame(base.2016[,c(2,4,5,6,7)])
-train_data <- Olympic_v2[,3:7]
-
-#Generate prediction intervals
-olympic.nb = glm.nb(count ~ log_pop + log_gdp_per_cap + host + comm_soviet,data=train_data)
-
-#add_pi comes from the library ciTools
-olympic.nb_pint <- add_pi(tb=newData,fit=olympic.nb, names=c("lpb", "upb"), alpha=0.1, nSims=20000)
-
-
-olympic.nb_pint %>%
-  mutate(inside=(count >lpb & count<upb))->preds.nb
-
-summary(preds.nb) 
-
-
-####finding MSEs
-preds<-data.frame(matrix(cbind(base.2016$count, preds.nb$pred, exp(fitted.lm)), ncol = 3))
-
-colnames(preds)<-c('Actual', 'Prediction.nb', 'Prediction.lm')
-
-mse.nb<-mean((preds$Actual-preds$Prediction.nb)^2)
-mse.lm<-mean((preds$Actual-preds$Prediction.lm)^2)
-```
-
-
 # Results 
 
 ## Comparison of Models
@@ -347,59 +273,65 @@ Table 7 compares the coefficients across different model specifications. We obse
 
 - Negative binomial produces similar coefficient and standard error estimates as OLS and robust linear regressions.
 
-Figure 6 compares the Actual medal count values vs. the values fit by the OLS linear regression and negative binomial regressions. The blue dots plot the predicted vs. actual values for all observations. The red line indicates perfect fit. We observe that the negative binomial regression appears to have better fit of the data.
+- Adding year / country fixed effects to the negative binomial regression does not substantially change the magnitude of model coefficients.
 
-Interestingly, table 7 shows that the OLS linear regression has better model fit, because it has lower AIC and MSE.
+We focus the remainder of comparisons on the OLS linear regression and negative binomial regression (without fixed effects). 
+
+## AIC, MSE, and Actual vs. Predicted
+Table 6 compares the AIC and MSE of the two models. Linear regression has both lower AIC and MSE, which would make it the more preferable model. The Actual vs. Predicted plots in Figure 6 corroborate this finding, and show that the higher MSE in the negative binomial model results from a few dramatic over-predictions.
 
 ## 2016 Out-of-sample Projection:
+We supplement the in-sample diagnostics with an out-of-sample projection on the 2016 Rio Summer Olymipcs. The medal count data for 2016 follows a similar distribution to the overall training data.
 
-As part of the data collection process, information for the year 2016 was also researched, but left out of the original analysis. Therefore, because the data was not part of the training set, we can use it as a testing set. The medal count data for 2016 is similarly distributed to the overall training data, so testing on it is a feasible plan.
+To determine the accuracy of each of our models we determined 95% prediction intervals for each of the 81 points in the 2016 medal count data. Then we calculated the ratio of data points that had their actual counts within their respective prediction intervals to total number of data points. 74 out of 81 points had medal counts within their respective 90% prediction intervals. 
 
-To determine the accuracy of each of our models we determined 90% prediction intervals for each of the 81 points in the 2016 medal count data. Then we calculated the ratio of data points that had their actual counts within their respective prediction intervals to total number of data points. For our estimated linear regression function, 
-$$\hat{Y} = -9.63058+0.44275X_1+0.40830X_2+0.86726X_3+1.03281X_4$$
-74 out of 81 points had medal counts within their respective 95% prediction intervals. 
+We performed the same analysis The same analysis on the negative binomial model, using  the $ciTools$ package. The package performs bootstrapping to obtain many values of the negative binomial parametre, generates multiple random samples from the negative binomial distributions, and then takes the 90% credible interval as the prediction interval. As in the linear regression case, the 90% prediction intervals captured the majority of the actual observations.
 
-The same analysis on the negative binomial model showed that a similar number of the 90% predictions intervals for 2016 fell around their observed intervals.
-
-$$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = -10.16577+0.49848X_1+0.40239X_2+0.69267X_3+1.03376X_4$$
+Table 6 compares the MSE for the 2016 out-of-sample projection. The linear model has substantially lower MSE than the negative binomial model. 
 
 # Discussion and Conclusions
+The OLS linear regression with all 4 predictor variables performed the best, out of the various models we have considered. This is surprising, given we had expected the negative binomial model to better capture the dependent variable's distribution, and hence perform as well, if not better, than linear regression. 
+
+All of our models indicate that population, GDP per capita, being a past, current, or future Olympics host, and being a command economy all correlate positively with higher medal count. Countries that belong to the command economy club on average earn 1.03% more medals than a similar, democratic country. 
+
+Future models can expand upon the methodology in this paper in the following ways: 
+1) Explore using mixed linear model to address the serial autocorrelation among country observations over time, given we are using panel data
+
+2) Our models only apply to countries that won at least one medal. Future studies can leverage logistic regression to identify factors correlated with whether or not a country can win at least a single medal, and then combine the forecasted probability of winning a medal with the number of medals we expect a country to win.
+
 
 \newpage
 # Bibliography
 
 \newpage
 # Appendix A
-
-```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Distribution of Count', fig.height=3}
-hist(Olympic_v2$count, lwd = 4, xlab = '', main = '')
+```{r, echo = F}
+df_1<-data.frame(matrix(summary(Olympic_v2$count), ncol = 6))
+colnames(df_1)<-c('Min.', '1st Qu.','Median',    'Mean', '3rd Qu.',    'Max')
+kable(df_1, caption = 'Summary of Count Variable')
 ```
 
-
-```{r, echo=FALSE, fig.pos='h', fig.height = 3.5, out.extra = '', fig.cap='Histogram of the Population Variables'}
+```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Distribution of Count', fig.height=3}
 par(mfrow=c(1,2))
+
+#Histogram of original count data
+hist(Olympic_v2$count, lwd = 4, main = 'Untransformed', xlab = 'Medal Count')
+
+#log(count)
+hist(log(Olympic_v2$count),main = "Transformed",xlab = "log(Medal Count)")
+```
+
+```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Histogram of the Population Variables'}
+par(mfrow=c(1,2))
+
 #Histogram Population
 hist(base$pop,main = "Untransformed",xlab = "Population")
+
 #Histogram log(Population)
 hist(log(base$pop),main = "Transformed",xlab = "log(Population)")
 ```
 
-```{r, echo = F}
-options(scipen = 999)
-
-kable(rbind('Count'=summary(Olympic_v2$count), 'Population'=summary(exp(Olympic_v2$log_pop)), 'GDP/Cap'=summary(exp(Olympic_v2$log_gdp_per_cap))), caption = 'Summary of Numerical Variables')
-```
-
-```{r, echo = F}
-this<-rbind('Host' = unname(table(Olympic_v2$host)),
-'Communist/Soviet' = unname(table(Olympic_v2$comm_soviet)))
-
-colnames(this)<-c('Off', 'On')
-
-kable(this, caption = 'Summary of Categorical Variables')
-```
-
-```{r, echo=FALSE, fig.height = 3.5, fig.pos='h', out.extra = '', fig.cap='Scatter Matrix'}
+```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Scatter Matrix'}
 plot(Olympic_v2[,c(3,4,5,6,7)])
 ```
 
@@ -447,16 +379,9 @@ Diagnostics = cbind(olympic.leapCP$which, Cp=round(olympic.leapCP$Cp,2), aR2=rou
 colnames(Diagnostics) = c("1","2","3","4","Cp","aR2","AIC","PRESS")
 ```
 
-\newpage
-
-```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Exploratory Linear Model Plots'}
+```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Final Linear Regression Residual Analysis'}
 par(mfrow=c(2,2))
 plot(olympic.lmfinal)
-```
-
-```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Exploratory Negative Binomial Model Plots'}
-par(mfrow=c(2,2))
-plot(olympic.nb)
 ```
 
 \newpage
@@ -473,40 +398,25 @@ kable(cbind(which, Parameters = olympic.nb_leap$size, Cp.nb, AIC.nb), caption = 
 
 \newpage
 
-```{r pred_vs_act, echo = F, echo=FALSE, out.extra = '', fig.cap='Comparison of Predicted vs. Actual'}
-knitr::opts_chunk$set(fig.pos = 'H')
-par(mfrow=c(1,2))
-plot(x=Olympic_v2$count, y = exp(olympic.lmfinal$fitted.values), col='blue', pch=20, xlab='Actual',
-     ylab='Predicted', main='OLS Linear Regression')
-abline(a=0,b=1, col='red')
-plot(x=Olympic_v2$count, y = olympic.nb$fitted.values, col='blue', pch=20, xlab='Actual',
-     ylab='Predicted', main='Negative Binomial Regression')
-abline(a=0,b=1, col='red')
-```
-
-\newpage
-
-```{r 2016_pred_vs_act, echo = F, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Out of Sample Comparison of Predicted vs. Actual'}
-par(mfrow=c(1,2))
-plot(x=base.2016$count, y = exp(fitted.lm), col='blue', pch=20, xlab='Actual',
-     ylab='Predicted', main='OLS Linear Regression')
-abline(a=0,b=1, col='red')
-plot(x=base.2016$count, y = preds.nb$pred, col='blue', pch=20, xlab='Actual',
-     ylab='Predicted', main='Negative Binomial Regression')
-abline(a=0,b=1, col='red')
-```
-
-\newpage
-
 ```{r AIC_comp, echo = F}
-df_20<-data.frame(matrix(c(2008.82, 442.44, 279.47, 2319.23,  480.74, 675.54), nrow = 2, byrow = T))
+df_20<-data.frame(matrix(c(2008.82, 0.751, 'TBD', 2319.23,  0.822, 'TBD'), nrow = 2, byrow = T))
 colnames(df_20)<-c('AIC', 'MSE', 'MSE (out of sample)')
 rownames(df_20)<-c('Linear', 'Negative Binomial')
-kable(df_20, caption = 'Linear vs. GLM Model Comparison (Absolute Scale)')
+kable(df_20, caption = 'Linear vs GLM Model Comparison')
 ```
 
 \newpage
- 
+
+```{r pred_vs_act, echo = F, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Comparison of Predicted vs. Actual'}
+par(mfrow=c(1,2))
+plot(x=exp(Olympic_v2$log_count), y = exp(olympic.lmfinal$fitted.values), xlim=c(0,120),ylim=c(0,270),col='blue', pch=20, xlab='Actual',
+     ylab='Predicted', main='OLS Linear Regression')
+abline(a=0,b=1, col='red')
+plot(x=exp(Olympic_v2$log_count), y = olympic.nb$fitted.values, col='blue', xlim=c(0,120), ylim=c(0,270),pch=20, xlab='Actual',
+     ylab='Predicted', main='Negative Binomial Regression')
+abline(a=0,b=1, col='red')
+```
+
 ```{r coeff, echo = F}
 df_133<-data.frame(matrix(c(
 '-9.63 (0.638)', '-10.04 (0.67)','-11.23 (0.254)','-10.17 (0.647)','-10.57 (0.641)',
@@ -525,35 +435,20 @@ rownames(df_133)<-c('Intercept','log(GDP/Cap)','log(Pop)','Host','Soviet/Comm')
 kable(df_133, caption = 'Coefficient Comparison')
 ```
 
+
+\newpage
 \newpage
 
-# Appendix B: Influential Cases
-```{r, echo = F, include = T, comment = NA}
+# Appendix B
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
+# Appendix C: Influential Cases
+```{r, echo = F, include = T}
 #Influential cases
 olympic.lm_inf=influence.measures(olympic.lmfinal)$is.inf
 idx=which(apply(olympic.lm_inf,1,any))
 #Influential Cases
-kable(Olympic[idx,])
-```
-
-\newpage
-
-```{r, echo = F, include = T, comment = NA}
+Olympic[idx,]
 #Inluential Cases by Test
-kable(olympic.lm_inf[idx,])
+olympic.lm_inf[idx,]
 ```
-
-# Appendix C
-```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
-```
-
-\newpage
-
-# Appendix D
-
-```{r, echo = F}
-
-kable(cbind('Country'=as.character(base.2016$country), 'Count' = preds.nb$count, 'NB Predictions' = round(preds.nb$pred, 2), 'NB Interval' = paste('(', preds.nb$lpb, ', ', preds.nb$upb, ')', sep = ''), 'Linear Predictions'=round(exp(fitted.lm), 2), 'Linear Intervals' = paste('(', round(exp(forecast.lm[,2])), ', ', round(exp(forecast.lm[,3])), ')', sep = '')), caption = '2016 Out-of-sample Predicted Values')
-
-```
-
