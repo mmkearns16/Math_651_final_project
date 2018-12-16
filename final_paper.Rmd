@@ -2,14 +2,15 @@
 title: "Math 651 Final Project"
 author: "Mary Peng, Hillary Dunn, and Max Kearns"
 date: "December 17, 2018"
-output: word_document
+output: 
+  pdf_document:
+    number_sections: true
 ---
 
 ```{r setup, include=FALSE, cache = T}
 knitr::opts_chunk$set(echo = FALSE, comment = NA)
-setwd('C:/Users/mpeng/Documents/Math_651_final_project/data')
 
-base <-read.csv('base_data.csv', stringsAsFactors = F)
+base <-read.csv('data/base_data.csv', stringsAsFactors = F)
 P__disp <- function(x) {
   pr <- sum(residuals(x, type="pearson")^2)
   dispersion <- pr/x$df.residual
@@ -295,6 +296,7 @@ The OLS linear regression with all 4 predictor variables performed the best, out
 All of our models indicate that population, GDP per capita, being a past, current, or future Olympics host, and being a command economy all correlate positively with higher medal count. Countries that belong to the command economy club on average earn 1.03% more medals than a similar, democratic country. 
 
 Future models can expand upon the methodology in this paper in the following ways: 
+
 1) Explore using mixed linear model to address the serial autocorrelation among country observations over time, given we are using panel data
 
 2) Our models only apply to countries that won at least one medal. Future studies can leverage logistic regression to identify factors correlated with whether or not a country can win at least a single medal, and then combine the forecasted probability of winning a medal with the number of medals we expect a country to win.
