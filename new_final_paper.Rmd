@@ -357,9 +357,9 @@ Table 6 compares the AIC and MSE of the two models. Linear regression has both l
 ## 2016 Out-of-sample Projection:
 We supplement the in-sample diagnostics with an out-of-sample projection on the 2016 Rio Summer Olympics. The medal count data for 2016 follows a similar distribution to the overall training data.
 
-To determine the accuracy of each of our models we determined 95% prediction intervals for each of the 81 points in the 2016 medal count data. Then we calculated the ratio of data points that had their actual counts within their respective prediction intervals to total number of data points. 74 out of 81 points had medal counts within their respective 90% prediction intervals. 
+To determine the accuracy of each of our models we determined 90% prediction intervals for each of the 81 points in the 2016 medal count data. Then we calculated the ratio of data points that had their actual counts within their respective prediction intervals to total number of data points. 74 out of 81 points had medal counts within their respective 90% prediction intervals. 
 
-We performed the same analysis The same analysis on the negative binomial model, using  the $ciTools$ package. The package performs bootstrapping to obtain many values of the negative binomial parameter, generates multiple random samples from the negative binomial distributions, and then takes the 90% credible interval as the prediction interval. As in the linear regression case, the 90% prediction intervals captured the majority of the actual observations.
+We performed the same analysis on the negative binomial model, using  the $ciTools$ package. The package performs bootstrapping to obtain many values of the negative binomial parameter, generates multiple random samples from the negative binomial distributions, and then takes the 90% credible interval as the prediction interval. As in the linear regression case, the 90% prediction intervals captured the majority of the actual observations.
 
 Table 6 compares the MSE for the 2016 out-of-sample projection. The linear model has substantially lower MSE than the negative binomial model. 
 
