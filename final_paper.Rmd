@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE, cache = T}
-knitr::opts_chunk$set(echo = FALSE, comment = NA)
+knitr::opts_chunk$set(echo = FALSE, fig.pos = 'H', comment = NA)
 
 base <-read.csv('data/base_data.csv', stringsAsFactors = F)
 P__disp <- function(x) {
@@ -21,8 +21,6 @@ library(qpcR)
 library(MuMIn)
 base.total = base[which(base$year!=2016),]
 Olympic = base.total[,c(2,3,4,5,6,7,8)]
-#Clean the data (Mary to add)
-#Make new dataframe with GDP / capita
 Olympic_v2 <- data.frame(year = Olympic$year, country = Olympic$country, count = Olympic$count, log_pop = log(Olympic$pop), log_gdp_per_cap = log(Olympic$gdp/Olympic$pop), host = Olympic$host, comm_soviet = Olympic$comm_soviet, log_count = log(Olympic$count))
 ```
 
@@ -307,33 +305,36 @@ Future models can expand upon the methodology in this paper in the following way
 
 \newpage
 # Appendix A
-```{r, echo = F}
-df_1<-data.frame(matrix(summary(Olympic_v2$count), ncol = 6))
-colnames(df_1)<-c('Min.', '1st Qu.','Median',    'Mean', '3rd Qu.',    'Max')
-kable(df_1, caption = 'Summary of Count Variable')
-```
 
 ```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Distribution of Count', fig.height=3}
-par(mfrow=c(1,2))
-
-#Histogram of original count data
-hist(Olympic_v2$count, lwd = 4, main = 'Untransformed', xlab = 'Medal Count')
-
-#log(count)
-hist(log(Olympic_v2$count),main = "Transformed",xlab = "log(Medal Count)")
+hist(Olympic_v2$count, lwd = 4, xlab = '', main = '')
 ```
 
-```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Histogram of the Population Variables'}
-par(mfrow=c(1,2))
 
+```{r, echo=FALSE, fig.pos='h', fig.height = 3.5, out.extra = '', fig.cap='Histogram of the Population Variables'}
+par(mfrow=c(1,2))
 #Histogram Population
 hist(base$pop,main = "Untransformed",xlab = "Population")
-
 #Histogram log(Population)
 hist(log(base$pop),main = "Transformed",xlab = "log(Population)")
 ```
 
-```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Scatter Matrix'}
+```{r, echo = F}
+options(scipen = 999)
+
+kable(rbind('Count'=summary(Olympic_v2$count), 'Population'=summary(exp(Olympic_v2$log_pop)), 'GDP/Cap'=summary(exp(Olympic_v2$log_gdp_per_cap))), caption = 'Summary of Numerical Variables')
+```
+
+```{r, echo = F}
+this<-rbind('Host' = unname(table(Olympic_v2$host)),
+'Communist/Soviet' = unname(table(Olympic_v2$comm_soviet)))
+
+colnames(this)<-c('Off', 'On')
+
+kable(this, caption = 'Summary of Categorical Variables')
+```
+
+```{r, echo=FALSE, fig.height = 3.5, fig.pos='h', out.extra = '', fig.cap='Scatter Matrix'}
 plot(Olympic_v2[,c(3,4,5,6,7)])
 ```
 
@@ -381,9 +382,16 @@ Diagnostics = cbind(olympic.leapCP$which, Cp=round(olympic.leapCP$Cp,2), aR2=rou
 colnames(Diagnostics) = c("1","2","3","4","Cp","aR2","AIC","PRESS")
 ```
 
-```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Final Linear Regression Residual Analysis'}
+\newpage
+
+```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Exploratory Linear Model Plots'}
 par(mfrow=c(2,2))
 plot(olympic.lmfinal)
+```
+
+```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Exploratory Negative Binomial Model Plots'}
+par(mfrow=c(2,2))
+plot(olympic.nb)
 ```
 
 \newpage
@@ -400,25 +408,40 @@ kable(cbind(which, Parameters = olympic.nb_leap$size, Cp.nb, AIC.nb), caption = 
 
 \newpage
 
-```{r AIC_comp, echo = F}
-df_20<-data.frame(matrix(c(2008.82, 0.751, 'TBD', 2319.23,  0.822, 'TBD'), nrow = 2, byrow = T))
-colnames(df_20)<-c('AIC', 'MSE', 'MSE (out of sample)')
-rownames(df_20)<-c('Linear', 'Negative Binomial')
-kable(df_20, caption = 'Linear vs GLM Model Comparison')
-```
-
-\newpage
-
-```{r pred_vs_act, echo = F, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Comparison of Predicted vs. Actual'}
+```{r pred_vs_act, echo = F, echo=FALSE, out.extra = '', fig.cap='Comparison of Predicted vs. Actual'}
+knitr::opts_chunk$set(fig.pos = 'H')
 par(mfrow=c(1,2))
-plot(x=exp(Olympic_v2$log_count), y = exp(olympic.lmfinal$fitted.values), xlim=c(0,120),ylim=c(0,270),col='blue', pch=20, xlab='Actual',
+plot(x=Olympic_v2$count, y = exp(olympic.lmfinal$fitted.values), col='blue', pch=20, xlab='Actual',
      ylab='Predicted', main='OLS Linear Regression')
 abline(a=0,b=1, col='red')
-plot(x=exp(Olympic_v2$log_count), y = olympic.nb$fitted.values, col='blue', xlim=c(0,120), ylim=c(0,270),pch=20, xlab='Actual',
+plot(x=Olympic_v2$count, y = olympic.nb$fitted.values, col='blue', pch=20, xlab='Actual',
      ylab='Predicted', main='Negative Binomial Regression')
 abline(a=0,b=1, col='red')
 ```
 
+\newpage
+
+```{r 2016_pred_vs_act, echo = F, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Out of Sample Comparison of Predicted vs. Actual'}
+par(mfrow=c(1,2))
+plot(x=base.2016$count, y = exp(fitted.lm), col='blue', pch=20, xlab='Actual',
+     ylab='Predicted', main='OLS Linear Regression')
+abline(a=0,b=1, col='red')
+plot(x=base.2016$count, y = preds.nb$pred, col='blue', pch=20, xlab='Actual',
+     ylab='Predicted', main='Negative Binomial Regression')
+abline(a=0,b=1, col='red')
+```
+
+\newpage
+
+```{r AIC_comp, echo = F}
+df_20<-data.frame(matrix(c(2008.82, 442.44, 279.47, 2319.23,  480.74, 675.54), nrow = 2, byrow = T))
+colnames(df_20)<-c('AIC', 'MSE', 'MSE (out of sample)')
+rownames(df_20)<-c('Linear', 'Negative Binomial')
+kable(df_20, caption = 'Linear vs. GLM Model Comparison (Absolute Scale)')
+```
+
+\newpage
+ 
 ```{r coeff, echo = F}
 df_133<-data.frame(matrix(c(
 '-9.63 (0.638)', '-10.04 (0.67)','-11.23 (0.254)','-10.17 (0.647)','-10.57 (0.641)',
@@ -437,20 +460,35 @@ rownames(df_133)<-c('Intercept','log(GDP/Cap)','log(Pop)','Host','Soviet/Comm')
 kable(df_133, caption = 'Coefficient Comparison')
 ```
 
-
-\newpage
 \newpage
 
-# Appendix B
-```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
-```
-# Appendix C: Influential Cases
-```{r, echo = F, include = T}
+# Appendix B: Influential Cases
+```{r, echo = F, include = T, comment = NA}
 #Influential cases
 olympic.lm_inf=influence.measures(olympic.lmfinal)$is.inf
 idx=which(apply(olympic.lm_inf,1,any))
 #Influential Cases
-Olympic[idx,]
-#Inluential Cases by Test
-olympic.lm_inf[idx,]
+kable(Olympic[idx,])
 ```
+
+\newpage
+
+```{r, echo = F, include = T, comment = NA}
+#Inluential Cases by Test
+kable(olympic.lm_inf[idx,])
+```
+
+# Appendix C
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
+
+\newpage
+
+# Appendix D
+
+```{r, echo = F}
+
+kable(cbind('Country'=as.character(base.2016$country), 'Count' = preds.nb$count, 'NB Predictions' = round(preds.nb$pred, 2), 'NB Interval' = paste('(', preds.nb$lpb, ', ', preds.nb$upb, ')', sep = ''), 'Linear Predictions'=round(exp(fitted.lm), 2), 'Linear Intervals' = paste('(', round(exp(forecast.lm[,2])), ', ', round(exp(forecast.lm[,3])), ')', sep = '')), caption = '2016 Out-of-sample Predicted Values')
+
+```
+
