@@ -367,7 +367,7 @@ Table 6 compares the MSE for the 2016 out-of-sample projection. The linear model
 
 The OLS linear regression with all 4 predictor variables performed the best, out of the various models we have considered. This is surprising, given we had expected the negative binomial model to better capture the dependent variable's distribution, and hence perform as well, if not better, than linear regression. 
 
-All of our models indicate that population, GDP per capita, being a past, current, or future Olympics host, and being a command economy all correlate positively with higher medal count. Countries that belong to the command economy club on average earn $\text{exp}(1.03)=2.801$ times more medals than a similar, democratic country. 
+All of our models indicate that population, GDP per capita, being a past, current, or future Olympics host, and being a command economy all correlate positively with higher medal count. Countries that belong to the command economy club on average earn 2.8 $(\text{exp}(1.03)=2.801)$ times more medals than a similar, democratic country. 
 
 Future models can expand upon the methodology in this paper in the following ways: 
 
