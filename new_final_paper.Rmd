@@ -27,6 +27,8 @@ Olympic_v2 <- data.frame(year = Olympic$year, country = Olympic$country, count =
 
 # Abstract 
 
+The Olympics are an important geopolitical event, where countries vie for national pride and acclaim. As such, the models explored in this paper attempt to explain some of the factors that go into a successful Olympic season. Linear and Negative Binomial modelling provide an interesting dissection of how population, GDP, being an Olympic Host, and having a command economy may effect a particular country's chances in the Olympics. We found that each of these factors correlate with a higher medal count, and provide a model to predict the outcomes of future Olympics, given these factors. 
+
 # Introduction
 
 Every four summers, the Olympic Games become the center of the world's attention, as elite athletes seek honor for both themselves and for their countries. Many countries associate tremendous national pride with their medal counts, since a nation's athletic competence also projects its soft power. 
@@ -45,7 +47,7 @@ We model on the total medal count, by participating country and year during whic
 Table 1 and Figure 1 both illustrate that the medal counts exhibit right-skewed distribution. Among countries that have won at least one medal, the median medal count is 5, while the mean medal count is 12. The skewed distribution suggests the need for a log transformation (in the case of a linear model), which can also ensure that the predictions are positive numbers. Moreover, given we are modeling on count data, where large counts rarely occur, a Poisson model may be more appropriate than linear regression.
 
 ### Predictor Variables
-Based on existing literature (Bernard and Busse 2006, Goldman Sachs 2016, Bian 2005), potentially significant predictors of medal count include a country's population size, GDP per capita, whether or not a country has hosted or will host a summer Olymipcs, and whether or not a country has ever been a command economy.
+Based on existing literature (Bernard and Busse 2006, Goldman Sachs 2016, Bian 2005), potentially significant predictors of medal count include a country's population size, GDP per capita, whether or not a country has hosted or will host a summer Olympics, and whether or not a country has ever been a command economy.
 
 $X_1: Population$: This variable indicates a country's population size in a given Olympic year. The left histogram in Figure 2 illustrates the right-skewed distribution of population across countries that won at least one medal (with China and India representing the far right). The right chart shows that applying a natural log transformation reduces the skewness and the influence of extreme X variable values on the model. 
 
@@ -196,7 +198,7 @@ lillie.test(olympic.lmfinal$residuals)
 ```
 The p-value$=0.2332>\alpha$, thus we fail to reject $H_0$ in favor of $H_a$ and conclude that we can reasonably assume that the error terms follow a normal distribution.
 
-Lastly, we check for influential cases. The Residuals vs. Leverage plot shows a few potential outliers. Appendix C summarizes the influential cases in our model, using Cook's Distance, DFFITS, DFBETAS, and COVRATIO. We consider an observation as an outlier if at least one of the above diagnostics flags it as influential. In total, we flag 37 out of 387 observations as outliers. Many of them are highly populous countries, such as the United States, China, and India. Additionally, many of the influential cases have hosted or will host the summer Olympics and have high medal count. We chose to keep these observations in the model, because they constitute 10% of our sample size and contian valuable information. 
+Lastly, we check for influential cases. The Residuals vs. Leverage plot shows a few potential outliers. Appendix C summarizes the influential cases in our model, using Cook's Distance, DFFITS, DFBETAS, and COVRATIO. We consider an observation as an outlier if at least one of the above diagnostics flags it as influential. In total, we flag 37 out of 387 observations as outliers. Many of them are highly populous countries, such as the United States, China, and India. Additionally, many of the influential cases have hosted or will host the summer Olympics and have high medal count. We chose to keep these observations in the model, because they constitute 10% of our sample size and contain valuable information. 
 
 Instead, we attempt to correct for non-constant variance and outliers by using robust linear regression, with Huber and Bisquare weights. As shown in table 7, the coefficients generated through robust linear regression, using Bisquare weights, fall within +/- 5% of the corresponding OLS regressions. The robust regression's standard errors are slightly larger than those of the OLS regression. We find similar results when using Huber weights. These results show that the influential cases in fact have limited influence on our model fit.
 
@@ -244,7 +246,7 @@ $$\text{ln}(Y_it) = \beta_0+\beta_1X_1it+\beta_2X_2it+\beta_3X_3it+\beta_4X_4it+
 
 $$\text{ln}(Y_it) = \beta_0+\beta_1X_1it+\beta_2X_2it+\beta_3X_3it+\beta_4X_4it+v_i$$
 
-where $d_i$ and $v_i$ represent dummies for year $t$ and country $i$, respectively. The year fixed effect accounts for changing number of sports and number of country participants. The country fixed effect accounts for unobservable factors that vary little over time, such as a country's investment in national sports teams, cultural attitude toward the Olympics, etc. 
+where $d_i$ and $v_i$ represent dummies for year $t$ and country $i$, respectively. The year fixed effect accounts for changing number of sports and number of country participants. The country fixed effect accounts for unobserved factors that vary little over time, such as a country's investment in national sports teams, cultural attitude toward the Olympics, etc. 
 
 
 ```{r weird algorithm thing, echo = F}
@@ -353,11 +355,11 @@ We focus the remainder of comparisons on the OLS linear regression and negative 
 Table 6 compares the AIC and MSE of the two models. Linear regression has both lower AIC and MSE, which would make it the more preferable model. The Actual vs. Predicted plots in Figure 6 corroborate this finding, and show that the higher MSE in the negative binomial model results from a few dramatic over-predictions.
 
 ## 2016 Out-of-sample Projection:
-We supplement the in-sample diagnostics with an out-of-sample projection on the 2016 Rio Summer Olymipcs. The medal count data for 2016 follows a similar distribution to the overall training data.
+We supplement the in-sample diagnostics with an out-of-sample projection on the 2016 Rio Summer Olympics. The medal count data for 2016 follows a similar distribution to the overall training data.
 
 To determine the accuracy of each of our models we determined 95% prediction intervals for each of the 81 points in the 2016 medal count data. Then we calculated the ratio of data points that had their actual counts within their respective prediction intervals to total number of data points. 74 out of 81 points had medal counts within their respective 90% prediction intervals. 
 
-We performed the same analysis The same analysis on the negative binomial model, using  the $ciTools$ package. The package performs bootstrapping to obtain many values of the negative binomial parametre, generates multiple random samples from the negative binomial distributions, and then takes the 90% credible interval as the prediction interval. As in the linear regression case, the 90% prediction intervals captured the majority of the actual observations.
+We performed the same analysis The same analysis on the negative binomial model, using  the $ciTools$ package. The package performs bootstrapping to obtain many values of the negative binomial parameter, generates multiple random samples from the negative binomial distributions, and then takes the 90% credible interval as the prediction interval. As in the linear regression case, the 90% prediction intervals captured the majority of the actual observations.
 
 Table 6 compares the MSE for the 2016 out-of-sample projection. The linear model has substantially lower MSE than the negative binomial model. 
 
@@ -368,7 +370,7 @@ All of our models indicate that population, GDP per capita, being a past, curren
 
 Future models can expand upon the methodology in this paper in the following ways: 
 
-1) Explore using mixed linear model to address the serial autocorrelation among country observations over time, given we are using panel data
+1) Explore using mixed linear model to address the serial autocorrelation among country observations over time, given we are using panel data.
 
 2) Our models only apply to countries that won at least one medal. Future studies can leverage logistic regression to identify factors correlated with whether or not a country can win at least a single medal, and then combine the forecasted probability of winning a medal with the number of medals we expect a country to win.
 
