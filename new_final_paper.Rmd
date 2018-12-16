@@ -280,7 +280,7 @@ fitted.lm = -9.63058+0.40830*base.2016$log_gdp_per_cap+0.44275*base.2016$log_pop
 
 #Prediction intervals: Linear Model
 nrow(base.2016)-5
-t=qt(1-0.05/2,76)
+t=qt(1-0.1/2,76)
 mse.lm = 0.751
 X = as.matrix(cbind(rep(1,nrow(Olympic_v2)),Olympic_v2$log_gdp_per_cap,Olympic_v2$log_pop,Olympic_v2$host,Olympic_v2$comm_soviet))
 
