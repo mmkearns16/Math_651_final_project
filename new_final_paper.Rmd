@@ -2,9 +2,12 @@
 title: "Math 651 Final Project"
 author: "Mary Peng, Hillary Dunn, and Max Kearns"
 date: "December 17, 2018"
+header-includes:
+    - \usepackage{setspace}\doublespacing
 output:
   pdf_document:
     number_sections: yes
+mainfont: Times New Roman
 ---
 
 ```{r setup, include=FALSE, cache = T}
