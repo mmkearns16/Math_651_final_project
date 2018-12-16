@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE, cache = T}
-knitr::opts_chunk$set(echo = FALSE, comment = NA)
+knitr::opts_chunk$set(echo = FALSE, fig.pos = 'H', comment = NA)
 base <-read.csv('data/base_data.csv', stringsAsFactors = F)
 P__disp <- function(x) {
   pr <- sum(residuals(x, type="pearson")^2)
@@ -55,7 +55,7 @@ $X_3: Host (1/0)$: This is a binary predictor variable with value equal to 1 if 
 
 $X_4: Command Economy  (1/0)$: This binary predictor variable indicates whether the country was once a member of the Soviet Union or Yugoslavia, or ruled by a Communist party. We assembled a list of formerly or currently Soviet, Yugoslavian, or Communist countries using $www.worldatlast.com$, $Wikepedia$'s list of communist parties, and $www.sporcle.com$. 111 data points are classified as former Soviet Union or Communist.
 
-We generate a correlation matrix (Table 2) and paired scatterplot (Figure 3) to illustrate the relationships between the variables, especially any multicollinearity. 
+We generate a correlation matrix (Table 3) and paired scatterplot (Figure 3) to illustrate the relationships between the variables, especially any multicollinearity. 
 
 The scatter plot matrix in Figure 3 shows positive correlation between count of medals and population size. We do not observe strong linear relationship between medal count and GDP per capita, whether or not a country has hosted or will host, and whether a country used to be part of a Command Economy. The correlation matrix corroborates the finding that population size has the strongest linear correlation with medal count (correlation = 0.48), and Command Economy (Y/N) has the weakest linear correlation (correlation = 0.09).
 
@@ -96,7 +96,7 @@ sum(base$host)
 ```
 
 
-```{r pop_hists, echo=FALSE, include = F}
+```{r pop_hists, fig.height = 3, echo=FALSE, include = F}
 par(mfrow=c(1,2))
 #Histogram Population
 hist(base$pop,main = "Untransformed",xlab = "Population")
@@ -153,7 +153,7 @@ allModelsResults.lm <- lapply(allModelsList,
 ```
 
 
-According to the selected model diagnostics shown in Table 3, the model with the smallest $C_p$ statistic, largest adjusted $R^2$ value, smallest AIC and smallest PRESS value is the model that includes all four predictor variables. We constructed a linear model (shown below), using the natural log to transform the count data. We decided to transform the count data to get the response variable to look more normally distributed so that it would follow the linear regression assumption that the response variable needs to be approximately normally distributed.
+According to the selected model diagnostics shown in Table 4, the model with the smallest $C_p$ statistic, largest adjusted $R^2$ value, smallest AIC and smallest PRESS value is the model that includes all four predictor variables. We constructed a linear model (shown below), using the natural log to transform the count data. We decided to transform the count data to get the response variable to look more normally distributed so that it would follow the linear regression assumption that the response variable needs to be approximately normally distributed.
 
 ```{r, echo = F}
 olympic.lmfinal <- lm(log_count ~ log_pop + log_gdp_per_cap + host + comm_soviet, data = Olympic_v2)
@@ -171,7 +171,7 @@ par(mfrow=c(2,2))
 plot(olympic.lmfinal)
 ```
 
-According to the Normal Q-Q plot (Figure X), it is reasonable to assume the residuals follow a normal distribution. However, the Residuals vs Fitted plot indicates possible heteroskedasticity or non-constant variance of the errors. The Breusch-Pagan test will help us determine if heteroskedasticity is affecting the model.
+According to the Normal Q-Q plot (Figure 4), it is reasonable to assume the residuals follow a normal distribution. However, the Residuals vs Fitted plot indicates possible heteroskedasticity or non-constant variance of the errors. The Breusch-Pagan test will help us determine if heteroskedasticity is affecting the model.
 
 
 Assuming $Var(\epsilon_i)=\sigma^2_i$ such that $\text{log}_e\sigma_i^2=\gamma_0+\gamma_1X_i$:
@@ -197,7 +197,7 @@ lillie.test(olympic.lmfinal$residuals)
 ```
 The p-value$=0.2332>\alpha$, thus we fail to reject $H_0$. Therefore, it is reasonable to assume that the error terms are distributed normally.
 
-We attempt to correct for non-constant variance and outliers by using robust linear regression, with Huber and Bisquare weights. As shown in table 6, the coefficients generated through robust linear regression, using Bisquare weights, fall within +/- 5% of the corresponding OLS regressions. The robust regression’s standard errors are slightly larger than those of the OLS regression. We find similar results when using Huber weights. Re-running the Breusch-Pagan test results in a p-value of 0.002, which means we would still reject the null hypothesis of homoskedasticity at $\alpha$ = 0.05 level, and conclude that the robust regression still exhibits non-constant variance.
+We attempt to correct for non-constant variance and outliers by using robust linear regression, with Huber and Bisquare weights. As shown in table 7, the coefficients generated through robust linear regression, using Bisquare weights, fall within +/- 5% of the corresponding OLS regressions. The robust regression’s standard errors are slightly larger than those of the OLS regression. We find similar results when using Huber weights. Re-running the Breusch-Pagan test results in a p-value of 0.002, which means we would still reject the null hypothesis of homoskedasticity at $\alpha$ = 0.05 level, and conclude that the robust regression still exhibits non-constant variance.
 
 
 #### Influential Cases
@@ -233,7 +233,7 @@ rownames(which) <-NULL
 colnames(which)<-c('Pop', 'GDP/C', 'Host', 'Soviet')
 ```
 
-A negative binomial regression model assumes that dispersion is greater than 1, which is consistent with these data. Therefore, it allows for more accurate tests of the parameters. Among the negative binomial models, the best model again proved to be the full model, after a comparison of AIC between all subsets of variables (Table X).
+A negative binomial regression model assumes that dispersion is greater than 1, which is consistent with these data. Therefore, it allows for more accurate tests of the parameters. Among the negative binomial models, the best model again proved to be the full model, after a comparison of AIC between all subsets of variables (Table 5).
 
 $$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = \beta_0+\beta_1X_1+\beta_2X_2+\beta_3X_3+\beta_4X_4$$
 $$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = -10.16577+0.49848X_1+0.40239X_2+0.69267X_3+1.03376X_4$$
@@ -291,8 +291,8 @@ for (i in 1:nrow(base.2016)){
   spred = c(spred,sqrt(s2))
 }
 
-lower.pred = fitted.lm - qt(1-0.05/2,76)*spred
-upper.pred = fitted.lm + qt(1-0.05/2,76)*spred
+lower.pred = fitted.lm - qt(1-0.10/2,76)*spred
+upper.pred = fitted.lm + qt(1-0.10/2,76)*spred
 
 forecast.lm = cbind(log(base.2016$count),lower.pred,upper.pred)
 ininterval.lm = cbind(forecast.lm[,2]<=forecast.lm[,1] & forecast.lm[,3]>=forecast.lm[,1])
@@ -322,7 +322,7 @@ olympic.nb_pint <- add_pi(tb=newData,fit=olympic.nb, names=c("lpb", "upb"), alph
 olympic.nb_pint %>%
   mutate(inside=(count >lpb & count<upb))->preds.nb
 
-summary(preds.nb)
+summary(preds.nb) 
 
 
 ####finding MSEs
@@ -339,7 +339,7 @@ mse.lm<-mean((preds$Actual-preds$Prediction.lm)^2)
 
 ## Comparison of Models
 
-Table 6 compares the coefficients across different model specifications. We observe the following: 
+Table 7 compares the coefficients across different model specifications. We observe the following: 
 
 - Compared to the OLS linear model, the robust linear model produces slightly larger standard errors, but similar coefficient magnitudes. This finding suggests that outliers do not substantially influence the OLS linear model fit.
 
@@ -347,19 +347,19 @@ Table 6 compares the coefficients across different model specifications. We obse
 
 - Negative binomial produces similar coefficient and standard error estimates as OLS and robust linear regressions.
 
-Figure 5 compares the Actual medal count values vs. the values fit by the OLS linear regression and negative binomial regressions. The blue dots plot the predicted vs. actual values for all observations. The red line indicates perfect fit. We observe that the negative binomial regression appears to have better fit of the data.
+Figure 6 compares the Actual medal count values vs. the values fit by the OLS linear regression and negative binomial regressions. The blue dots plot the predicted vs. actual values for all observations. The red line indicates perfect fit. We observe that the negative binomial regression appears to have better fit of the data.
 
-Interestingly, table 6 shows that the OLS linear regression has better model fit, because it has lower AIC and MSE.
+Interestingly, table 7 shows that the OLS linear regression has better model fit, because it has lower AIC and MSE.
 
 ## 2016 Out-of-sample Projection:
 
 As part of the data collection process, information for the year 2016 was also researched, but left out of the original analysis. Therefore, because the data was not part of the training set, we can use it as a testing set. The medal count data for 2016 is similarly distributed to the overall training data, so testing on it is a feasible plan.
 
-To determine the accuracy of each of our models we determined 95% prediction intervals for each of the 81 points in the 2016 medal count data. Then we calculated the ratio of data points that had their actual counts within their respective prediction intervals to total number of data points. For our estimated linear regression function, 
+To determine the accuracy of each of our models we determined 90% prediction intervals for each of the 81 points in the 2016 medal count data. Then we calculated the ratio of data points that had their actual counts within their respective prediction intervals to total number of data points. For our estimated linear regression function, 
 $$\hat{Y} = -9.63058+0.44275X_1+0.40830X_2+0.86726X_3+1.03281X_4$$
 74 out of 81 points had medal counts within their respective 95% prediction intervals. 
 
-The same analysis on the negative binomial model showed that a similar number of the 95% predictions intervals for 2016 fell around their observed intervals.
+The same analysis on the negative binomial model showed that a similar number of the 90% predictions intervals for 2016 fell around their observed intervals.
 
 $$\text{ln}(E(Y_i|X_i)) = \text{ln}(\lambda_i) = -10.16577+0.49848X_1+0.40239X_2+0.69267X_3+1.03376X_4$$
 
@@ -376,7 +376,7 @@ hist(Olympic_v2$count, lwd = 4, xlab = '', main = '')
 ```
 
 
-```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Histogram of the Population Variables'}
+```{r, echo=FALSE, fig.pos='h', fig.height = 3.5, out.extra = '', fig.cap='Histogram of the Population Variables'}
 par(mfrow=c(1,2))
 #Histogram Population
 hist(base$pop,main = "Untransformed",xlab = "Population")
@@ -399,7 +399,7 @@ colnames(this)<-c('Off', 'On')
 kable(this, caption = 'Summary of Categorical Variables')
 ```
 
-```{r, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Scatter Matrix'}
+```{r, echo=FALSE, fig.height = 3.5, fig.pos='h', out.extra = '', fig.cap='Scatter Matrix'}
 plot(Olympic_v2[,c(3,4,5,6,7)])
 ```
 
@@ -473,12 +473,25 @@ kable(cbind(which, Parameters = olympic.nb_leap$size, Cp.nb, AIC.nb), caption = 
 
 \newpage
 
-```{r pred_vs_act, echo = F, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Comparison of Predicted vs. Actual'}
+```{r pred_vs_act, echo = F, echo=FALSE, out.extra = '', fig.cap='Comparison of Predicted vs. Actual'}
+knitr::opts_chunk$set(fig.pos = 'H')
 par(mfrow=c(1,2))
 plot(x=Olympic_v2$count, y = exp(olympic.lmfinal$fitted.values), col='blue', pch=20, xlab='Actual',
      ylab='Predicted', main='OLS Linear Regression')
 abline(a=0,b=1, col='red')
 plot(x=Olympic_v2$count, y = olympic.nb$fitted.values, col='blue', pch=20, xlab='Actual',
+     ylab='Predicted', main='Negative Binomial Regression')
+abline(a=0,b=1, col='red')
+```
+
+\newpage
+
+```{r 2016_pred_vs_act, echo = F, echo=FALSE, fig.pos='h', out.extra = '', fig.cap='Out of Sample Comparison of Predicted vs. Actual'}
+par(mfrow=c(1,2))
+plot(x=base.2016$count, y = exp(fitted.lm), col='blue', pch=20, xlab='Actual',
+     ylab='Predicted', main='OLS Linear Regression')
+abline(a=0,b=1, col='red')
+plot(x=base.2016$count, y = preds.nb$pred, col='blue', pch=20, xlab='Actual',
      ylab='Predicted', main='Negative Binomial Regression')
 abline(a=0,b=1, col='red')
 ```
@@ -513,8 +526,6 @@ kable(df_133, caption = 'Coefficient Comparison')
 ```
 
 \newpage
-\newpage
-\newpage
 
 # Appendix B: Influential Cases
 ```{r, echo = F, include = T, comment = NA}
@@ -542,7 +553,7 @@ kable(olympic.lm_inf[idx,])
 
 ```{r, echo = F}
 
-kable(cbind('Count' = preds.nb$count, 'NB Predictions' = round(preds.nb$pred, 2), 'NB Interval' = paste('(', preds.nb$lpb, ', ', preds.nb$upb, ')', sep = ''), 'Linear Predictions'=round(exp(fitted.lm), 2), 'Linear Intervals' = paste('(', round(exp(forecast.lm[,2])), ', ', round(exp(forecast.lm[,3])), ')', sep = '')), caption = 'Out-of-sample Predicted Values')
+kable(cbind('Country'=as.character(base.2016$country), 'Count' = preds.nb$count, 'NB Predictions' = round(preds.nb$pred, 2), 'NB Interval' = paste('(', preds.nb$lpb, ', ', preds.nb$upb, ')', sep = ''), 'Linear Predictions'=round(exp(fitted.lm), 2), 'Linear Intervals' = paste('(', round(exp(forecast.lm[,2])), ', ', round(exp(forecast.lm[,3])), ')', sep = '')), caption = '2016 Out-of-sample Predicted Values')
 
 ```
 
